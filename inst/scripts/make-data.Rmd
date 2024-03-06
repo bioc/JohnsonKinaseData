@@ -1,0 +1,209 @@
+---
+title: "Download and preprocess the supplemental tables in Johnson et al. 2023 (doi:10.1038/s41586-022-05575-3)"
+author: "Florian Geier"
+date: "31.Jan.2024"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(width = 100)
+```
+
+```{r}
+library(here) # set relative locations
+
+library(readxl) # read raw data (excel files)
+library(dplyr)
+library(tidyr)
+library(stringr)
+
+library(Homo.sapiens) # add kinase gene annotations
+```
+
+## Download raw data
+
+```{r}
+here::i_am('inst/scripts/make-data.Rmd')
+
+download.file(url = 'https://static-content.springer.com/esm/art%3A10.1038%2Fs41586-022-05575-3/MediaObjects/41586_2022_5575_MOESM3_ESM.xlsx', 
+              destfile = here::here('inst','extdata','41586_2022_5575_MOESM3_ESM.xlsx'))
+
+download.file(url = 'https://static-content.springer.com/esm/art%3A10.1038%2Fs41586-022-05575-3/MediaObjects/41586_2022_5575_MOESM4_ESM.xlsx',
+              destfile = here::here('inst','extdata','41586_2022_5575_MOESM4_ESM.xlsx'))
+
+download.file(url = 'https://static-content.springer.com/esm/art%3A10.1038%2Fs41586-022-05575-3/MediaObjects/41586_2022_5575_MOESM5_ESM.xlsx',
+              destfile = here::here('inst','extdata','41586_2022_5575_MOESM5_ESM.xlsx'))
+```
+
+## Kinase annotation
+
+- Extract annotation for each kinase matrix and add Entrez ID and gene descriptions 
+  from Bioc annotation databases
+
+```{r}
+anno <- readxl::read_excel(here::here('inst','extdata','41586_2022_5575_MOESM3_ESM.xlsx'), 
+                           sheet='Table S1 Data')
+anno <- anno |>
+  dplyr::mutate(MatrixName = Matrix_name,
+                UniprotID = `Uniprot id`,
+                GeneName = Gene,
+                KinaseFamily = Family) |>
+  dplyr::select(MatrixName, GeneName, UniprotID, KinaseFamily) 
+
+## add EntrezID and gene description
+sel <- AnnotationDbi::select(Homo.sapiens, 
+                             keys = anno |> dplyr::pull(GeneName), 
+                             keytype = "SYMBOL", 
+                             columns = c("GENEID","GENENAME"))
+# 1:1
+df <- anno |> 
+  dplyr::full_join(sel, by = join_by(GeneName == SYMBOL)) |>
+  dplyr::rename(Description = GENENAME, EntrezID = GENEID) |>
+  dplyr::relocate(EntrezID, Description, .after = UniprotID)
+
+write.csv(df, 
+          file = here::here('inst','extdata','JohnsonKinaseAnnotation.csv'), 
+          row.names = FALSE)
+```
+
+## Process kinase matrices
+
+- PWMs are taken from `ser_thr_all_norm_scaled_matrice` sheet.
+
+- For each kinase matrix, the phospho-acceptor favourability is calculated from the raw data (`ser_thr_all_raw_matrices` sheet) as described in the supplement of Johnson et al. 2023.
+
+- The S/T favourability is added to each matrix at the central position (position 0) and all values are converted to log2-odds.
+
+- The PWMs contain lower case letters for phosphorylated, non-central S/T/Y residues.
+
+```{r}
+## only used to calculate phospho-acceptor favourability
+data_raw <- readxl::read_excel((here::here('inst','extdata','41586_2022_5575_MOESM4_ESM.xlsx')),
+                               sheet = 'ser_thr_all_raw_matrices') |>
+  dplyr::rename(Matrix = 1) |> 
+  tidyr::pivot_longer(cols = -Matrix,
+                      names_to = "Position",
+                      values_to = "Score") |>
+  tidyr::separate_wider_regex(cols = "Position", 
+                              patterns = c(Position = "[^A-z]+", 
+                                           AA = "[A-z]+")) 
+
+ST_fav <- data_raw |> 
+  dplyr::filter(AA %in% c('S','T')) |>
+  dplyr::group_by(Matrix, AA) |> 
+  dplyr::summarize(Total = sum(Score)) |>
+  tidyr::pivot_wider(values_from = Total, names_from = AA) |>
+  dplyr::mutate(Sctrl = 0.75 * S - 0.25 * T,
+                Tctrl = 0.75 * T - 0.25 * S,
+                S = Sctrl/max(c(Sctrl, Tctrl)),
+                T = Tctrl/max(c(Sctrl, Tctrl))) |>
+  dplyr::select(Matrix, S, T) |>
+  tidyr::pivot_longer(cols = -Matrix,
+                      names_to = "AA",
+                      values_to = "Score") |>
+  dplyr::mutate(Position = 0) |> ungroup()
+
+## load scaled data (odds)
+data_scaled <- readxl::read_excel(here::here('inst','extdata','41586_2022_5575_MOESM4_ESM.xlsx'),
+                                  sheet='ser_thr_all_norm_scaled_matrice') |>
+  dplyr::rename(Matrix = 1) |> 
+  tidyr::pivot_longer(cols = -Matrix,
+                      names_to = "Position",
+                      values_to = "Score") |>
+  tidyr::separate_wider_regex(cols = "Position", 
+                              patterns = c(Position = "[^A-z]+", 
+                                           AA = "[A-z]+")) |>
+  dplyr::mutate(Position = as.integer(Position)) # 
+
+## merge with S/T favourability odds and convert to log2 odd score
+PWM <- data_scaled |> 
+  dplyr::full_join(ST_fav) |>
+  dplyr::mutate(Score = log2(Score)) |>
+  dplyr::arrange(Matrix, Position, AA)
+
+write.csv(PWM, 
+          file = gzfile(here::here('inst','extdata','JohnsonKinasePWM.csv.gz')), 
+          row.names = FALSE)
+```
+
+## PWM background scores
+
+- Background peptide sequences are taken from the `SITE_+/-7_AA`
+  column of the corresponding excel sheet, and the central 10 AA are
+  extracted (central phosphosite at position 6)
+
+- Next, all kinase PWMs defined above are matched against all unique
+  background peptides
+
+- The resulting score vectors are combine into a data frame and saved.
+
+```{r}
+background <- readxl::read_excel(here::here('inst','extdata',"41586_2022_5575_MOESM5_ESM.xlsx"),
+                                 sheet='Supplementary Table 3')
+
+sites <- background |>
+  dplyr::mutate(sites = stringr::str_sub(background$`SITE_+/-7_AA`, start = 3, end = 12)) |>
+  dplyr::pull(sites) |>
+  unique()
+
+length(sites) # reported in paper: 82,735 but is 85,603 unique sites in the table
+
+source(here::here('R','score_phosphosites.R')) # functionality to score sites
+
+PWM <- getKinasePWM()
+scores <- score_phosphosites(PWM, sites, type = 'log2_odds')
+  
+write.csv(data.frame(PhosphoSite = sites, scores), 
+          file = gzfile(here::here('inst','extdata','JohnsonKinaseBackgroundScores.csv.gz')), 
+          row.names = FALSE)
+
+## compute quantiles
+probs <- seq(0,1,length.out=1001)
+quants <- sapply(colnames(scores), function(x)  quantile(scores[,x], probs))
+write.csv(data.frame(Quantiles = probs, quants), 
+          file = gzfile(here::here('inst','extdata','JohnsonKinaseBackgroundQuantiles.csv.gz')), 
+          row.names = FALSE)
+```
+
+## Notes 
+
+- While the PWMs can match phosphorylated, non-central S/T/Y residues by lower case letters, the background sites do not contain any of these cases. Since the contribution of phosphorylated, non-central S/T/Y residues to the total PWM score can be quite substantial, the largest observed background score is in all cases smaller than the maximal PWM score. As a consequence, mapping the PWM score to its percentile rank will cap the score to the maximum of the background and not take phosphorylated, non-central S/T/Y residues into account.
+
+## Session information
+
+```{}
+sessionInfo()
+```
+
+```{r, echo=FALSE, eval=FALSE}
+## try to infer PWMs from raw data; not used due to missing information
+
+# The densitometry matrices were column-normalized at all positions by the sum of the 17 randomized amino acids (excluding serine, threonine and cysteine), to yield PSSMs (Supplementary Table 2). PDHK1 and PDHK4 were normalized to the 16 randomized amino acids (excluding serine, threonine, cysteine and additionally tyrosine), corresponding to the uniquely customized peptide library that profiled these kinases. 
+data_norm <- data_raw |>
+  dplyr::group_by(Matrix, Position) |>
+  dplyr::mutate(Total1 = sum(dplyr::if_else(AA %in% c('S','T','C','t','s','y'), 0, Score)),
+                Total2 = sum(dplyr::if_else(AA %in% c('S','T','C','Y','s','t','y'), 0, Score)),
+                Normalized = dplyr::if_else(Matrix %in% c('PDHK1','PDHK4'), Score/Total2, Score/Total1)) |>
+  dplyr::ungroup()
+
+# The cysteine row was scaled by its median to be 1/17 (1/16 for PDHK1 and PDHK4). 
+data_norm <- data_norm |>
+  dplyr::group_by(Matrix, AA) |>
+  dplyr::mutate(med = median(Normalized),
+                Normalized = dplyr::case_when(AA == 'C' ~ Normalized/17/med, 
+                                              Matrix %in% c('PDHK1','PDHK4') & AA == 'C' ~ Normalized/16/med,
+                                              .default = Normalized)) |>
+  dplyr::ungroup()
+
+# The serine and threonine values in each position were set to be the median of that position. ??? seems not correct!
+data_norm <- data_norm |>
+  dplyr::group_by(Matrix, Position) |>
+  # dplyr::mutate(med_ST = median(dplyr::if_else(AA %in% c('S','T'), Normalized, NA), na.rm = TRUE),
+  #               Normalized = dplyr::if_else(AA %in% c('S','T'), med_ST, Normalized))
+  dplyr::mutate(Normalized = dplyr::if_else(AA %in% c('S','T'), median(Normalized), Normalized))
+  
+data_norm |> dplyr::filter(AA %in% c("S","T") & Position == -5)  
+
+## all values are "scaled to random frequency of amino acids" to get the final PWMs (without phospho-acceptor favourability). What is the random frequency of amino acids used?
+```

@@ -1,0 +1,20 @@
+Package: JohnsonKinaseData
+Title: Kinase PWMs based on data published by Johnson et al. 2023  (doi:10.1038/s41586-022-05575-3)
+Version: 0.99.0
+Date: 2023-09-19
+Authors@R:
+    person("Florian", "Geier", , "florian.geier@unibas.ch", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-9076-9264"))
+Description: The packages provides kinase position weight matrices (PWMs) and background PWM scores which can be used to infer kinase activity from phospho-proteomics data.
+License: Artistic-2.0
+BugReports: https://support.bioconductor.org/t/JohnsonKinaseData
+Imports: 
+    ExperimentHub
+Suggests: 
+    ExperimentHubData,
+    testthat (>= 3.0.0)
+biocViews: ExperimentHub
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Config/testthat/edition: 3

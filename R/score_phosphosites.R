@@ -1,4 +1,4 @@
-#' getKinasePWM
+#' get_kinase_pwms
 #'
 #' Get a list of position weight matrices (PWMs) for the 303 human
 #' serine/threonine kinases originally published in Johnson et al. 2023.
@@ -10,15 +10,15 @@
 #' @export
 #'
 #' @examples
-#' PWM <- getKinasePWM()
+#' PWM <- get_kinase_pwms()
 get_kinase_pwms <- function(include_ST_favorability = TRUE) {
   
   checkmate::assert_logical(include_ST_favorability)
   
-  PWM <- JohnsonKinaseData::JohnsonKinasePWM()
+  pwms <- JohnsonKinaseData::JohnsonKinasePWM()
   
   ## convert to a list of numeric matrices
-  lapply(split(PWM, PWM$Matrix), function(x) {
+  lapply(split(pwms, pwms$Matrix), function(x) {
     x <- x |> 
       dplyr::select(-Matrix) |> 
       tidyr::pivot_wider(values_from = Score, 
@@ -31,7 +31,7 @@ get_kinase_pwms <- function(include_ST_favorability = TRUE) {
   })
 }
 
-#' getScoreMap
+#' get_score_maps
 #'
 #' For each kinase PWM get a function that maps the log2-odds score to a
 #' percentile rank. The percentile rank of a given score is the percentage of
@@ -56,8 +56,8 @@ get_kinase_pwms <- function(include_ST_favorability = TRUE) {
 #' @export
 #'
 #' @examples
-#' maps <- getScoreMap()
-getScoreMap <- function() {
+#' maps <- get_score_maps()
+get_score_maps <- function() {
   PR <- JohnsonKinaseData::JohnsonKinaseBackgroundQuantiles()
   lapply(PR[,-1], function(score, quant) {
     stats::approxfun(score, quant, 
@@ -86,7 +86,7 @@ getScoreMap <- function() {
 #' The score is either the PWM match score (`log2_odds`) or the percentile rank
 #' (`percentile`) in the background score distribution.
 #'
-#' @param PWM List with kinase PWMs as returned by `getKinasePWM()`.
+#' @param PWM List with kinase PWMs as returned by `get_kinase_pwms()`.
 #' @param sites A character vector with phosphosites. Check
 #'   `process_phosphosites()` for the correct phosphosite format.
 #' @param score_type Percentile rank or log2-odds score.
@@ -96,18 +96,19 @@ getScoreMap <- function() {
 #' @return A numeric matrix of size length(sites) times length(kinases).
 #' @export
 #'
-#' @seealso [process_phosphosites()] for the correct phosphosite format, and
-#'   [getScoreMap()] for mapping PWM scores to percentile ranks
+#' @seealso [get_kinase_pwms()] for getting a list of kinase PWMs,
+#'   [process_phosphosites()] for the correct phosphosite format, and
+#'   [get_score_maps()] for mapping PWM scores to percentile ranks
 #'
 #' @examples
-#' score <- score_phosphosites(getKinasePWM(), c("TGRRHTLAEV", "LISAVSPEIR"))
-score_phosphosites <- function(PWM, sites, score_type = c('percentile', 'log2_odds'), 
+#' score <- score_phosphosites(get_kinase_pwms(), c("TGRRHTLAEV", "LISAVSPEIR"))
+score_phosphosites <- function(pwms, sites, score_type = c('percentile', 'log2_odds'), 
                                BPPARAM = BiocParallel::MulticoreParam(1)) {
 
-  checkmate::assert_list(PWM, types = c("numeric", "matrix"), 
+  checkmate::assert_list(pwms, types = c("numeric", "matrix"), 
                          unique = TRUE, any.missing = FALSE, names = 'named')
   
-  if (!all(sapply(PWM, ncol) == 10)) {
+  if (!all(sapply(pwms, ncol) == 10)) {
     stop('PWMs have incorrect dimension!')
   }
   
@@ -125,7 +126,7 @@ score_phosphosites <- function(PWM, sites, score_type = c('percentile', 'log2_od
   checkmate::assert_class(BPPARAM, "BiocParallelParam")
   
   scores <- BiocParallel::bplapply(
-    PWM, 
+    pwms, 
     FUN = function(pwm, sites) {
       .score_phosphosites(sites, pwm)
     },
@@ -133,7 +134,7 @@ score_phosphosites <- function(PWM, sites, score_type = c('percentile', 'log2_od
     BPPARAM = BPPARAM)
   
   if (score_type == "percentile") {
-    score_maps <- getScoreMap()
+    score_maps <- get_score_maps()
     
     if (!all(names(scores) %in% names(score_maps))) {
       stop('Not all PWMs have score maps!')
@@ -150,6 +151,6 @@ score_phosphosites <- function(PWM, sites, score_type = c('percentile', 'log2_od
     scores <- do.call(cbind, scores)    
   }
   
-  dimnames(scores) <- list(sites, names(PWM))
+  dimnames(scores) <- list(sites, names(pwms))
   scores
 }

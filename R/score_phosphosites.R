@@ -1,28 +1,24 @@
 #' getKinasePWM
 #'
-#' Get a list of position specific weight matrices (PWMs) for the 303 human
+#' Get a list of position weight matrices (PWMs) for the 303 human
 #' serine/threonine kinases originally published in Johnson et al. 2023.
 #'
 #' @param include_ST_favorability Include serine vs. threonine favorability for
 #'   the central phospho-acceptor?
-#' @param include_phospho_priming Include phosphorylated residues in the
-#'   surrounding sequence?
 #'
 #' @return A named list of numeric matrices (PWMs).
 #' @export
 #'
 #' @examples
-#' PWM <- JohnsonKinasePWM()
-getKinasePWM <- function(include_ST_favorability = TRUE,
-                         include_phospho_priming = TRUE) {
+#' PWM <- getKinasePWM()
+get_kinase_pwms <- function(include_ST_favorability = TRUE) {
   
   checkmate::assert_logical(include_ST_favorability)
-  checkmate::assert_logical(include_phospho_priming)
   
   PWM <- JohnsonKinaseData::JohnsonKinasePWM()
   
   ## convert to a list of numeric matrices
-  lapply(split(PWM,PWM$Matrix), function(x) {
+  lapply(split(PWM, PWM$Matrix), function(x) {
     x <- x |> 
       dplyr::select(-Matrix) |> 
       tidyr::pivot_wider(values_from = Score, 
@@ -31,8 +27,6 @@ getKinasePWM <- function(include_ST_favorability = TRUE,
     rownames(y) <- x |> dplyr::pull(AA)
     if (!include_ST_favorability)
       y[,'0'] <- NA
-    if (!include_phospho_priming)
-      y <- y[-which(rownames(y) %in% c('s','t','y')),]
     y
   })
 }
@@ -42,7 +36,9 @@ getKinasePWM <- function(include_ST_favorability = TRUE,
 #' For each kinase PWM get a function that maps the log2-odds score to a
 #' percentile rank. The percentile rank of a given score is the percentage of
 #' scores in corresponding background score distribution that are less than or
-#' equal to that score.
+#' equal to that score. The background score distribution is derived from
+#' matching each PWM to the 85603 unique phosphosites published in Johnson et
+#' al. 2023.
 #'
 #' Note that the background sites used by Johnson et al. do not contain any
 #' non-central phosphorylated residues (phospho-priming). Therefore any input
@@ -52,11 +48,11 @@ getKinasePWM <- function(include_ST_favorability = TRUE,
 #' Internally, stats::approxfun is used to linearly interpolate between the PWM
 #' score and its 0.1% - quantile in the distribution over background scores.
 #' This approximation allows for a lower memory footprint compared with the full
-#' set of background scores per PWM.
+#' set of background scores.
 
-#' @return A list of functions, one for each kinase PWM. Each function is taking
-#'   a vector of PWM log2-odds scores and maps them to a percentile rank in the
-#'   range [0,100].
+#' @return A named list of functions, one for each kinase PWM. Each function is
+#'   taking a vector of PWM log2-odds scores and maps them to a percentile rank
+#'   in the range [0,100].
 #' @export
 #'
 #' @examples
@@ -76,7 +72,8 @@ getScoreMap <- function() {
 .score_phosphosites <- function(sites, pwm) {
   sapply(sites, function(aa) {
     aa_score <- pwm[cbind(base::match(aa,rownames(pwm)), seq_along(aa))]
-    # all unmatched characters (=NA), like "_" or "." evaluate to 0 
+    # all unmatched characters (like "_" or ".") evaluate to NA and don't
+    # contribute to the score sum
     sum(aa_score, na.rm = TRUE) 
   })
 }
@@ -87,21 +84,20 @@ getScoreMap <- function() {
 #' phosphosites as input and returns a matrix of match scores per PWM and site.
 #'
 #' The score is either the PWM match score (`log2_odds`) or the percentile rank
-#' (`percentile`). The percentile rank of a given score is defined as the
-#' percentage of scores from a background score distribution which are less than
-#' or equal to the given score. Here the background score distribution is
-#' derived from matching each PWM to the 85603 unique phosphosites published in
-#' Johnson et al. 2023.
+#' (`percentile`) in the background score distribution.
 #'
 #' @param PWM List with kinase PWMs as returned by `getKinasePWM()`.
 #' @param sites A character vector with phosphosites. Check
 #'   `process_phosphosites()` for the correct phosphosite format.
-#' @param score_type Scoring method:  percentile rank or log2-odds-score.
+#' @param score_type Percentile rank or log2-odds score.
 #' @param BPPARAM A BiocParallelParam object specifying how parallelization
 #'   should be performed.
 #'
 #' @return A numeric matrix of size length(sites) times length(kinases).
 #' @export
+#'
+#' @seealso [process_phosphosites()] for the correct phosphosite format, and
+#'   [getScoreMap()] for mapping PWM scores to percentile ranks
 #'
 #' @examples
 #' score <- score_phosphosites(getKinasePWM(), c("TGRRHTLAEV", "LISAVSPEIR"))

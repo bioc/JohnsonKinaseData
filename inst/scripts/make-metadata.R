@@ -5,7 +5,7 @@ library(HubPub)
 metadata <- HubPub::hub_metadata(
   Title = "JohnsonKinaseAnnotation",
   Description = "Annotation data for each kinase PWM",
-  BiocVersion = "4.1",
+  BiocVersion = "3.19",
   Genome = NA_character_,
   SourceType = "XLS/XLSX",
   SourceUrl = "https://static-content.springer.com/esm/art%3A10.1038%2Fs41586-022-05575-3/MediaObjects/41586_2022_5575_MOESM3_ESM.xlsx",
@@ -28,7 +28,7 @@ HubPub::add_resource(here::here(), metadata)
 metadata <- HubPub::hub_metadata(
   Title = "JohnsonKinasePWM",
   Description = "List of kinase position weight matrices (PWMs)",
-  BiocVersion = "4.1",
+  BiocVersion = "3.19",
   Genome = NA_character_,
   SourceType = "XLS/XLSX",
   SourceUrl = "https://static-content.springer.com/esm/art%3A10.1038%2Fs41586-022-05575-3/MediaObjects/41586_2022_5575_MOESM4_ESM.xlsx",
@@ -51,7 +51,7 @@ HubPub::add_resource(here::here(), metadata)
 metadata <- HubPub::hub_metadata(
   Title = "JohnsonKinaseBackroundScores",
   Description = "Matrix of PWM scores on a set of background phosphosites",
-  BiocVersion = "4.1",
+  BiocVersion = "3.19",
   Genome = NA_character_,
   SourceType = "XLS/XLSX",
   SourceUrl = "https://static-content.springer.com/esm/art%3A10.1038%2Fs41586-022-05575-3/MediaObjects/41586_2022_5575_MOESM5_ESM.xlsx",
@@ -74,7 +74,7 @@ HubPub::add_resource(here::here(), metadata)
 metadata <- HubPub::hub_metadata(
   Title = "JohnsonKinaseBackroundQuantiles",
   Description = "Matrix of PWM score quantiles on a set of background phosphosites",
-  BiocVersion = "4.1",
+  BiocVersion = "3.19",
   Genome = NA_character_,
   SourceType = "XLS/XLSX",
   SourceUrl = "https://static-content.springer.com/esm/art%3A10.1038%2Fs41586-022-05575-3/MediaObjects/41586_2022_5575_MOESM5_ESM.xlsx",
@@ -92,4 +92,3 @@ metadata <- HubPub::hub_metadata(
 )
 
 HubPub::add_resource(here::here(), metadata)
-

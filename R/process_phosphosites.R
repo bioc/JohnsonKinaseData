@@ -1,7 +1,7 @@
 #' Process phosphosites to a common format used for PWM matching
 #'
 #' The central phospho-acceptor of each phosphosite is recognized in two ways.
-#' Either the acceptor residue is followed by an asterisk (*) character, such as
+#' Either the acceptor residue is followed by an asterisk (*) character, e.g.,
 #' "SAGLLS*DEDC". Alternatively, it is defined as the central residue i.e. at
 #' position `floor(width(site))+1`.
 #'
@@ -37,7 +37,7 @@ process_phosphosites <- function(sites,
                   count = stringr::str_count(sites, "\\*")) 
   
   if ( any(data$count > 1) )
-    stop('Data contains sites with multiple phosphorylations. Considered replacing non-central S/T/Y by lower case letters.')
+    stop('Data contains sites with multiple phosphorylations. Considered replacing non-central S*/T*/Y* by the lower case letters s/t/y.')
   
   data <- data |>
     dplyr::mutate(left = ifelse(count > 0,

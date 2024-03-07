@@ -15,8 +15,8 @@ metadata <- HubPub::hub_metadata(
   Coordinate_1_based = NA,
   DataProvider = "Nature publishing group",
   Maintainer = "Florian Geier <florian.geier@unibas.ch>",
-  RDataClass = "data.frame",
-  DispatchClass = "data.frame",
+  RDataClass = "character",
+  DispatchClass = "FilePath",
   Location_Prefix = "https://zenodo.org/",
   RDataPath = "records/10628874/files/JohnsonKinaseAnnotation.csv",
   Tags = "Phosphoproteomics:Kinase activity:PWM"
@@ -38,8 +38,8 @@ metadata <- HubPub::hub_metadata(
   Coordinate_1_based = NA,
   DataProvider = "Nature publishing group",
   Maintainer = "Florian Geier <florian.geier@unibas.ch>",
-  RDataClass = "data.frame",
-  DispatchClass = "data.frame",
+  RDataClass = "character",
+  DispatchClass = "FilePath",
   Location_Prefix = "https://zenodo.org/",
   RDataPath = "records/10628874/files/JohnsonKinasePWM.csv.gz",
   Tags = "Phosphoproteomics:Kinase activity:PWM"
@@ -61,8 +61,8 @@ metadata <- HubPub::hub_metadata(
   Coordinate_1_based = NA,
   DataProvider = "Nature publishing group",
   Maintainer = "Florian Geier <florian.geier@unibas.ch>",
-  RDataClass = "data.frame",
-  DispatchClass = "data.frame",
+  RDataClass = "character",
+  DispatchClass = "FilePath",
   Location_Prefix = "https://zenodo.org/",
   RDataPath = "records/10628874/files/JohnsonKinaseBackgroundScores.csv.gz",
   Tags = "Phosphoproteomics:Kinase activity:PWM"
@@ -84,8 +84,8 @@ metadata <- HubPub::hub_metadata(
   Coordinate_1_based = NA,
   DataProvider = "Nature publishing group",
   Maintainer = "Florian Geier <florian.geier@unibas.ch>",
-  RDataClass = "data.frame",
-  DispatchClass = "data.frame",
+  RDataClass = "character",
+  DispatchClass = "FilePath",
   Location_Prefix = "https://zenodo.org/",
   RDataPath = "records/10628874/files/JohnsonKinaseBackgroundQuantiles.csv.gz",
   Tags = "Phosphoproteomics:Kinase activity:PWM"

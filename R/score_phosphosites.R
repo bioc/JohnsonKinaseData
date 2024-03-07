@@ -15,7 +15,7 @@ get_kinase_pwms <- function(include_ST_favorability = TRUE) {
   
   checkmate::assert_logical(include_ST_favorability)
   
-  pwms <- JohnsonKinaseData::JohnsonKinasePWM()
+  pwms <- read.csv( JohnsonKinasePWM() )
   
   ## convert to a list of numeric matrices
   lapply(split(pwms, pwms$Matrix), function(x) {
@@ -58,7 +58,7 @@ get_kinase_pwms <- function(include_ST_favorability = TRUE) {
 #' @examples
 #' maps <- get_score_maps()
 get_score_maps <- function() {
-  PR <- JohnsonKinaseData::JohnsonKinaseBackgroundQuantiles()
+  PR <- read.csv( JohnsonKinaseBackgroundQuantiles() )
   lapply(PR[,-1], function(score, quant) {
     stats::approxfun(score, quant, 
                      yleft = 0, yright = 100, 

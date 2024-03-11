@@ -22,6 +22,22 @@
 #'   "y".
 #'
 #' @return A tibble with columns: `sites`, `processed`, `residue`
+#' 
+#' @importFrom checkmate assert_character
+#' @importFrom checkmate assert_logical
+#' @importFrom tidyr tibble
+#' @importFrom dplyr mutate
+#' @importFrom stringr str_width
+#' @importFrom stringr str_count
+#' @importFrom stringr str_replace
+#' @importFrom stringr str_sub
+#' @importFrom stringr regex
+#' @importFrom stringr str_pad
+#' @importFrom stringr str_trunc
+#' @importFrom stringr str_extract
+#' @importFrom stringr str_c
+#' @importFrom stringr str_to_upper
+#' 
 #' @export
 #'
 #' @examples

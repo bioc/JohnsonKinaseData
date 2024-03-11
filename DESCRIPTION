@@ -6,7 +6,7 @@ Authors@R:
     person("Florian", "Geier", , "florian.geier@unibas.ch", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-9076-9264"))
 Description: The packages provides kinase position weight matrices (PWMs) and background PWM scores which can be used to infer kinase activity from phospho-proteomics data.
-License: Artistic-2.0
+License: MIT License
 BugReports: https://support.bioconductor.org/t/JohnsonKinaseData
 Imports: 
     ExperimentHub

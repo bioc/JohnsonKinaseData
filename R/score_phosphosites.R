@@ -7,6 +7,12 @@
 #'   the central phospho-acceptor?
 #'
 #' @return A named list of numeric matrices (PWMs).
+#' 
+#' @importFrom checkmate assert_logical
+#' @importFrom dplyr select
+#' @importFrom dplyr pull
+#' @importFrom tidyr pivot_wider
+#' 
 #' @export
 #'
 #' @examples
@@ -53,6 +59,9 @@ get_kinase_pwms <- function(include_ST_favorability = TRUE) {
 #' @return A named list of functions, one for each kinase PWM. Each function is
 #'   taking a vector of PWM log2-odds scores and maps them to a percentile rank
 #'   in the range 0 to 100.
+#'   
+#' @importFrom stats approxfun
+#' 
 #' @export
 #'
 #' @examples
@@ -68,7 +77,7 @@ get_score_maps <- function() {
 
 
 #' Low level site scoring function
-#' @export
+#' @noRd
 .score_phosphosites <- function(sites, pwm) {
   sapply(sites, function(aa) {
     aa_score <- pwm[cbind(base::match(aa,rownames(pwm)), seq_along(aa))]
@@ -94,6 +103,12 @@ get_score_maps <- function() {
 #'   should be performed.
 #'
 #' @return A numeric matrix of size `length(sites)` times `length(kinases)`.
+#'
+#' @importFrom checkmate assert_list
+#' @importFrom checkmate assert_character
+#' @importFrom checkmate assert_class
+#' @importFrom BiocParallel bplapply
+#' 
 #' @export
 #'
 #' @seealso [get_kinase_pwms()] for getting a list of kinase PWMs,
@@ -145,11 +160,13 @@ score_phosphosites <- function(pwms, sites, score_type = c('percentile', 'log2_o
       },
       scores,
       score_maps[names(scores)],
+      SIMPLIFY = FALSE,
+      USE.NAMES = TRUE,
       BPPARAM = BPPARAM)
-  } else {
-    scores <- do.call(cbind, scores)    
   }
   
+  scores <- do.call(cbind, scores)
   dimnames(scores) <- list(sites, names(pwms))
+  
   scores
 }

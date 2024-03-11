@@ -10,7 +10,7 @@
 #' @export
 #'
 #' @examples
-#' PWM <- get_kinase_pwms()
+#' pwms <- get_kinase_pwms()
 get_kinase_pwms <- function(include_ST_favorability = TRUE) {
   
   checkmate::assert_logical(include_ST_favorability)
@@ -33,17 +33,17 @@ get_kinase_pwms <- function(include_ST_favorability = TRUE) {
 
 #' get_score_maps
 #'
-#' For each kinase PWM get a function that maps the log2-odds score to a
-#' percentile rank. The percentile rank of a given score is the percentage of
-#' scores in corresponding background score distribution that are less than or
-#' equal to that score. The background score distribution is derived from
-#' matching each PWM to the 85603 unique phosphosites published in Johnson et
-#' al. 2023.
+#' For each kinase PWM, get a function that maps its log2-odds score to the
+#' percentile rank in the background score distribution. The percentile rank of
+#' a given score is the percentage of scores in corresponding background score
+#' distribution that are less than or equal to that score. The background score
+#' distribution per PWM is derived from matching each PWM to the 85'603 unique
+#' phosphosites published in Johnson et al. 2023.
 #'
 #' Note that the background sites used by Johnson et al. do not contain any
 #' non-central phosphorylated residues (phospho-priming). Therefore any input
 #' sites which include phospho-priming will be capped to 100 percentile rank, if
-#' their PWM score exceeds the largest observed background score.
+#' their PWM score exceeds the largest observed background score for that PWM.
 #'
 #' Internally, stats::approxfun is used to linearly interpolate between the PWM
 #' score and its 0.1% - quantile in the distribution over background scores.
@@ -52,7 +52,7 @@ get_kinase_pwms <- function(include_ST_favorability = TRUE) {
 
 #' @return A named list of functions, one for each kinase PWM. Each function is
 #'   taking a vector of PWM log2-odds scores and maps them to a percentile rank
-#'   in the range [0,100].
+#'   in the range 0 to 100.
 #' @export
 #'
 #' @examples
@@ -86,14 +86,14 @@ get_score_maps <- function() {
 #' The score is either the PWM match score (`log2_odds`) or the percentile rank
 #' (`percentile`) in the background score distribution.
 #'
-#' @param PWM List with kinase PWMs as returned by `get_kinase_pwms()`.
+#' @param pwms List with kinase PWMs as returned by [get_kinase_pwms()].
 #' @param sites A character vector with phosphosites. Check
-#'   `process_phosphosites()` for the correct phosphosite format.
+#'   [process_phosphosites()] for the correct phosphosite format.
 #' @param score_type Percentile rank or log2-odds score.
 #' @param BPPARAM A BiocParallelParam object specifying how parallelization
 #'   should be performed.
 #'
-#' @return A numeric matrix of size length(sites) times length(kinases).
+#' @return A numeric matrix of size `length(sites)` times `length(kinases)`.
 #' @export
 #'
 #' @seealso [get_kinase_pwms()] for getting a list of kinase PWMs,
@@ -120,7 +120,6 @@ score_phosphosites <- function(pwms, sites, score_type = c('percentile', 'log2_o
     stop("'sites' elements are expected to be of length 10. Consider using 'process_phosphosites()'.")
   }
   
-  checkmate::assert_string(score_type)
   score_type <- match.arg(score_type)
   
   checkmate::assert_class(BPPARAM, "BiocParallelParam")

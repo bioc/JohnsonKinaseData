@@ -72,7 +72,7 @@ HubPub::add_resource(here::here(), metadata)
 
 # kinase background score quantiles
 metadata <- HubPub::hub_metadata(
-  Title = "JohnsonKinaseBackroundQuantiles",
+  Title = "JohnsonKinaseBackgroundQuantiles",
   Description = "Matrix of PWM score quantiles on a set of background phosphosites",
   BiocVersion = "3.19",
   Genome = NA_character_,

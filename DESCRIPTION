@@ -9,7 +9,13 @@ Description: The packages provides kinase position weight matrices (PWMs) and ba
 License: MIT License
 BugReports: https://support.bioconductor.org/t/JohnsonKinaseData
 Imports: 
-    ExperimentHub
+    ExperimentHub,
+    BiocParallel, 
+    checkmate, 
+    dplyr, 
+    stats, 
+    stringr, 
+    tidyr
 Suggests: 
     ExperimentHubData,
     testthat (>= 3.0.0)

@@ -1,6 +1,6 @@
 Package: JohnsonKinaseData
 Title: Kinase PWMs based on data published by Johnson et al. 2023  (doi:10.1038/s41586-022-05575-3)
-Version: 0.1.0
+Version: 0.99.0
 Date: 2023-09-19
 Authors@R:
     person("Florian", "Geier", , "florian.geier@unibas.ch", role = c("aut", "cre"),

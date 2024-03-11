@@ -49,7 +49,7 @@ HubPub::add_resource(here::here(), metadata)
 
 # kinase background scores
 metadata <- HubPub::hub_metadata(
-  Title = "JohnsonKinaseBackroundScores",
+  Title = "JohnsonKinaseBackgroundScores",
   Description = "Matrix of PWM scores on a set of background phosphosites",
   BiocVersion = "3.19",
   Genome = NA_character_,

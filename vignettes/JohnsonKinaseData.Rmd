@@ -1,0 +1,42 @@
+---
+title: "JohnsonKinaseData"
+author: "Florian Geier"
+date: "`r BiocStyle::doc_date()`"
+package: "`r BiocStyle::pkg_ver('JohnsonKinaseData')`"
+output: 
+  BiocStyle::html_document:
+    toc_float: true
+vignette: >
+  %\VignetteIndexEntry{JohnsonKinaseData}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+bibliography: JohnsonKinaseData.bib
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(JohnsonKinaseData)
+```
+
+# Intro
+
+The \pkg{JohnsonKinaseData} package provides position specific weight matrices (PWMs) for 303 human serine/threonine specific kinases originally published in [@Johnson2023]. 
+
+# Scoring of user-provided phosphosites
+
+# Outlook: kinase activity predictions
+
+# Session info
+
+```{r session-info}
+sessionInfo()
+```
+

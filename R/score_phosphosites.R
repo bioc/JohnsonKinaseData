@@ -79,12 +79,12 @@ get_score_maps <- function() {
 #' Low level site scoring function
 #' @noRd
 .score_phosphosites <- function(sites, pwm) {
-  sapply(sites, function(aa) {
+  vapply(sites, function(aa) {
     aa_score <- pwm[cbind(base::match(aa,rownames(pwm)), seq_along(aa))]
     # all unmatched characters (like "_" or ".") evaluate to NA and don't
     # contribute to the score sum
     sum(aa_score, na.rm = TRUE) 
-  })
+  }, rep(NA_real_, length(sites)))
 }
 
 #' Match kinase PWMs to processed phosphosites
@@ -123,7 +123,7 @@ score_phosphosites <- function(pwms, sites, score_type = c('percentile', 'log2_o
   checkmate::assert_list(pwms, types = c("numeric", "matrix"), 
                          unique = TRUE, any.missing = FALSE, names = 'named')
   
-  if (!all(sapply(pwms, ncol) == 10)) {
+  if (!all(vapply(pwms, ncol, rep(NA_integer_, length(pwms))) == 10)) {
     stop('PWMs have incorrect dimension!')
   }
   
@@ -131,7 +131,7 @@ score_phosphosites <- function(pwms, sites, score_type = c('percentile', 'log2_o
   
   splitted <- strsplit(sites, split="")
   
-  if (!all(sapply(splitted, length) == 10)) {
+  if (!all(vapply(splitted, length, rep(NA_integer_, length(splitted))) == 10)) {
     stop("'sites' elements are expected to be of length 10. Consider using 'process_phosphosites()'.")
   }
   

@@ -57,17 +57,27 @@ process_phosphosites <- function(sites,
   
   data <- data |>
     dplyr::mutate(left = ifelse(count > 0,
-                                stringr::str_replace(sites, stringr::regex(paste0("\\*", '(\\w*)$')), ''),
-                                stringr::str_sub(sites, end = floor(width/2) + 1)),
+                                stringr::str_replace(sites, 
+                                                     stringr::regex(paste0("\\*", '(\\w*)$')), 
+                                                     ''),
+                                stringr::str_sub(sites, 
+                                                 end = floor(width/2) + 1)),
                   right = ifelse(count > 0,
-                                 stringr::str_replace(sites, stringr::regex(paste0('^(\\w*)', "\\*")), ''),
-                                 stringr::str_sub(sites, start = floor(width/2) + 2))) |>
+                                 stringr::str_replace(sites, 
+                                                      stringr::regex(paste0('^(\\w*)', "\\*")), 
+                                                      ''),
+                                 stringr::str_sub(sites, 
+                                                  start = floor(width/2) + 2))) |>
     dplyr::mutate(left = ifelse(stringr::str_width(left) <= 5, 
-                                stringr::str_pad(left, pad = '_', width = (5+1), side = "left"),
-                                stringr::str_trunc(left, width = (5+1), side = "left", ellipsis = "")),
+                                stringr::str_pad(left, pad = '_', 
+                                                 width = (5+1), side = "left"),
+                                stringr::str_trunc(left, ellipsis = "",
+                                                   width = (5+1), side = "left")),
                   right = ifelse(stringr::str_width(right) < 4,
-                                 stringr::str_pad(right, pad = '_', width = 4, side = "right"),
-                                 stringr::str_trunc(right, width = 4, side = "right", ellipsis = ""))) |>
+                                 stringr::str_pad(right, pad = '_', 
+                                                  width = 4, side = "right"),
+                                 stringr::str_trunc(right, ellipsis = "",
+                                                    width = 4, side = "right"))) |>
     dplyr::mutate(residue = stringr::str_extract(left, '\\w$'))
   
   if (any(!data$residue %in% c('S','T')))

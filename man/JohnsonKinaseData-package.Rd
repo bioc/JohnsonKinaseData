@@ -25,6 +25,7 @@ substrate specificities for the human serine/threonine kinome. Nature 613,
 \seealso{
 Useful links:
 \itemize{
+  \item \url{https://github.com/fgeier/JohnsonKinaseData/}
   \item Report bugs at \url{https://support.bioconductor.org/t/JohnsonKinaseData}
 }
 

@@ -22,13 +22,40 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
-library(JohnsonKinaseData)
-```
-
 # Intro
 
-The \pkg{JohnsonKinaseData} package provides position specific weight matrices (PWMs) for 303 human serine/threonine specific kinases originally published in [@Johnson2023]. 
+Johnson et al. [@Johnson2023] published for 303 human serine/threonine specific kinases subtrate affinities in the form of position-specific weight matrices (PWMs). The \pkg{JohnsonKinaseData} package provides access to these PWMs including basic functionality to match user-provided phosphosites against all kinase PWMs. The aim is to give the user a simple way of predicting kinase-substrate relationships based on PWM-phosphosite matching. These predictions can serve to infer kinase activity from differential phospho-proteomic data. 
+
+# Loading kinase PWMs
+
+The kinase PWMs can be accessed with the `getKinasePWM()` function. It returns a list with 303 human serine/threonine specific PWMs. 
+
+```{r, load-pwm}
+library(JohnsonKinaseData)
+pwms <- getKinasePWM()
+
+head(names(pwms))
+```
+
+Each PWM is a numeric matrix with amino acids as rows and positions as columns. Matrix elements are log2-odd scores measuring differential affinity relative to a random frequency of amino acids [@Johnson2023]. 
+
+```{r pwm-example}
+pwms[["PLK2"]]
+```
+
+Beside the 20 standard amino acids, also phosphorylated serine, threonine and tyrosine residues are include. These phosphorylated residues are distinct from the central phospho-acceptor (serine/threonine at position `0`) and can have a strong impact on the affinity of a given kinase-substrate pair (phospho-priming). The central phospho-acceptor site is located at position `0` and only measures the relative favorability of serine over threonine. The user can exclude this favorability measure by setting the parameter `includeSTfavorability` to `FALSE`, in which case all central log2-odd scores are set to `NA`.
+
+```{r, pwm-st}
+pwms2 <- getKinasePWM(includeSTfavorability=FALSE)
+```
+
+# Processing user-provided phosphosites
+
+Phosphorylated peptides are often represented in two different formats: (1) the phosphorylated residue(s) are indicated by an asterix as in `SAGLLS*DEDC`. Alternatively, phosphorylated residues are indicated by lower case letters as in `SAGLLsDEDC`. In order to unify the phsophosite representation, \pkg{JohnsonKinaseData} provides the function `processPhosphopeptides()` which takes a character vector with phosphopeptides
+
+
+The user can provide phosphosites as a character vector. which are macthed against all 303 kinase PWMs. These have to be processed with the function `processPhosphosites`In order to math PWMs to user-provided phosphosites
+
 
 # Scoring of user-provided phosphosites
 

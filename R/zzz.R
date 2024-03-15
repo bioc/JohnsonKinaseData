@@ -4,30 +4,27 @@
     ExperimentHub::createHubAccessors(pkgname, titles)
 }
 
-#' get_kinase_annotation
+#' Get annnotation data for all 303 human serine/threonine kinase PWMs
 #'
-#' Annotation data for all 303 human kinase PWMs
-#'
-#' @return A data frame with columns MatrixName, GeneName, UniprotID, EntrezID, Description and KinaseFamily
+#' @return A data frame with columns MatrixName, GeneName, UniprotID, EntrezID,
+#'   Description and KinaseFamily
 #' @export
 #'
 #' @examples
-#' anno <- get_kinase_annotation()
-get_kinase_annotation <- function() {
+#' anno <- getKinaseAnnotation()
+getKinaseAnnotation <- function() {
   read.csv( JohnsonKinaseAnnotation() )
 }
 
-#' get_background_scores
+#' Get precomputed PWM scores for a large set of curated human phosphosites
 #'
-#' A data frame with precomputed PWM scores for a large set of curated
-#' phosphosites
-#'
-#' @return Data frame with match scores per phosphosite (rows) and PWMs (columns)
+#' @return A data frame with log2-odds scores per phosphosite (rows) and PWMs
+#'   (columns)
 #' @export
 #'
 #' @examples
-#' bg <- get_background_scores()
-get_background_scores <- function() {
+#' bg <- getBackgroundScores()
+getBackgroundScores <- function() {
   read.csv( JohnsonKinaseBackgroundScores() )
 }
 

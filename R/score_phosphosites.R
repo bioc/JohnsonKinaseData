@@ -1,9 +1,7 @@
-#' get_kinase_pwms
-#'
 #' Get a list of position weight matrices (PWMs) for the 303 human
 #' serine/threonine kinases originally published in Johnson et al. 2023.
 #'
-#' @param include_ST_favorability Include serine vs. threonine favorability for
+#' @param includeSTfavorability Include serine vs. threonine favorability for
 #'   the central phospho-acceptor?
 #'
 #' @return A named list of numeric matrices (PWMs).
@@ -16,10 +14,10 @@
 #' @export
 #'
 #' @examples
-#' pwms <- get_kinase_pwms()
-get_kinase_pwms <- function(include_ST_favorability = TRUE) {
+#' pwms <- getKinasePWM()
+getKinasePWM <- function(includeSTfavorability=TRUE) {
   
-  checkmate::assert_logical(include_ST_favorability)
+  checkmate::assert_logical(includeSTfavorability)
   
   pwms <- read.csv( JohnsonKinasePWM() )
   
@@ -27,17 +25,17 @@ get_kinase_pwms <- function(include_ST_favorability = TRUE) {
   lapply(split(pwms, pwms$Matrix), function(x) {
     x <- x |> 
       dplyr::select(-Matrix) |> 
-      tidyr::pivot_wider(values_from = Score, 
-                         names_from = Position) 
+      tidyr::pivot_wider(values_from=Score, 
+                         names_from=Position) 
     y <- as.matrix(x |> dplyr::select(-AA))
     rownames(y) <- x |> dplyr::pull(AA)
-    if (!include_ST_favorability)
-      y[,'0'] <- NA
+    if (!includeSTfavorability)
+      y[,'0'] <- NA_real_
     y
   })
 }
 
-#' get_score_maps
+#' Map log2-odds score to percentile rank
 #'
 #' For each kinase PWM, get a function that maps its log2-odds score to the
 #' percentile rank in the background score distribution. The percentile rank of
@@ -65,40 +63,69 @@ get_kinase_pwms <- function(include_ST_favorability = TRUE) {
 #' @export
 #'
 #' @examples
-#' maps <- get_score_maps()
-get_score_maps <- function() {
+#' maps <- getScoreMaps()
+getScoreMaps <- function() {
   PR <- read.csv( JohnsonKinaseBackgroundQuantiles() )
   lapply(PR[,-1], function(score, quant) {
     stats::approxfun(score, quant, 
-                     yleft = 0, yright = 100, 
-                     ties = min)
+                     yleft=0, yright=100, 
+                     ties=min)
   }, quant = 100 * PR[,"Quantiles"])
 }
 
 
-#' Low level site scoring function
+#' Low level single PWM scoring function
 #' @noRd
-.score_phosphosites <- function(sites, pwm) {
-  vapply(sites, function(aa) {
-    aa_score <- pwm[cbind(base::match(aa,rownames(pwm)), seq_along(aa))]
-    # all unmatched characters (like "_" or ".") evaluate to NA and don't
-    # contribute to the score sum
-    sum(aa_score, na.rm = TRUE) 
-  }, rep(NA_real_, length(sites)))
+.scoreSinglePWM <- function(sites, pwm) {
+  vapply(sites, 
+         FUN=function(aa) {
+           aa_score <- pwm[cbind(base::match(aa,rownames(pwm)), seq_along(aa))]
+           ## all unmatched characters (like "_" or ".") evaluate to NA and 
+           ## don't contribute to the score sum
+           sum(aa_score, na.rm=TRUE) 
+         }, 
+         NA_real_)
+}
+
+#' Low level multiple PWM scoring function
+#' @noRd
+.scoreMultiplePWM <- function(sites, pwms, BPPARAM) {
+  BiocParallel::bplapply(
+    pwms,
+    FUN=function(pwm, sites) {
+      .scoreSinglePWM(sites, pwm)
+    },
+    sites=sites,
+    BPPARAM=BPPARAM
+  )
+}
+
+#' log2-odds to percentile rank
+#' @noRd
+.lodToPR <- function(scores, scoreMaps, BPPARAM) {
+  BiocParallel::bpmapply(
+    FUN=function(score, scoreMap) {
+      scoreMap(score)
+    },
+    scores,
+    scoreMaps[names(scores)],
+    SIMPLIFY=FALSE,
+    USE.NAMES=TRUE,
+    BPPARAM=BPPARAM)
 }
 
 #' Match kinase PWMs to processed phosphosites
 #'
-#' `score_phosphosites` takes a list of kinase PWMs and a vector of processed
+#' `scorePhosphosites` takes a list of kinase PWMs and a vector of processed
 #' phosphosites as input and returns a matrix of match scores per PWM and site.
 #'
-#' The score is either the PWM match score (`log2_odds`) or the percentile rank
+#' The score is either the PWM match score (`lod`) or the percentile rank
 #' (`percentile`) in the background score distribution.
 #'
-#' @param pwms List with kinase PWMs as returned by [get_kinase_pwms()].
+#' @param pwms List with kinase PWMs as returned by [getKinasePWM()].
 #' @param sites A character vector with phosphosites. Check
-#'   [process_phosphosites()] for the correct phosphosite format.
-#' @param score_type Percentile rank or log2-odds score.
+#'   [processPhosphosites()] for the correct phosphosite format.
+#' @param scoreType Percentile rank or log2-odds score.
 #' @param BPPARAM A BiocParallelParam object specifying how parallelization
 #'   should be performed.
 #'
@@ -111,19 +138,20 @@ get_score_maps <- function() {
 #' 
 #' @export
 #'
-#' @seealso [get_kinase_pwms()] for getting a list of kinase PWMs,
-#'   [process_phosphosites()] for the correct phosphosite format, and
-#'   [get_score_maps()] for mapping PWM scores to percentile ranks
+#' @seealso [getKinasePWM()] for getting a list of kinase PWMs,
+#'   [processPhosphosites()] for the correct phosphosite format, and
+#'   [getScoreMaps()] for mapping PWM scores to percentile ranks
 #'
 #' @examples
-#' score <- score_phosphosites(get_kinase_pwms(), c("TGRRHTLAEV", "LISAVSPEIR"))
-score_phosphosites <- function(pwms, sites, score_type = c('percentile', 'log2_odds'), 
-                               BPPARAM = BiocParallel::MulticoreParam(1)) {
+#' score <- scorePhosphosites(getKinasePWM(), c("TGRRHTLAEV", "LISAVSPEIR"))
+scorePhosphosites <- function(pwms, sites, 
+                              scoreType=c('percentile', 'lod'), 
+                              BPPARAM=BiocParallel::MulticoreParam(1)) {
 
-  checkmate::assert_list(pwms, types = c("numeric", "matrix"), 
-                         unique = TRUE, any.missing = FALSE, names = 'named')
+  checkmate::assert_list(pwms, types=c("numeric", "matrix"), 
+                         unique=TRUE, any.missing=FALSE, names='named')
   
-  if (!all(vapply(pwms, ncol, rep(NA_integer_, length(pwms))) == 10)) {
+  if (!all(vapply(pwms, ncol, NA_integer_) == 10)) {
     stop('PWMs have incorrect dimension!')
   }
   
@@ -131,38 +159,24 @@ score_phosphosites <- function(pwms, sites, score_type = c('percentile', 'log2_o
   
   splitted <- strsplit(sites, split="")
   
-  if (!all(vapply(splitted, length, rep(NA_integer_, length(splitted))) == 10)) {
-    stop("'sites' elements are expected to be of length 10. Consider using 'process_phosphosites()'.")
+  if (!all(vapply(splitted, length, NA_integer_) == 10)) {
+    stop("'sites' elements are expected to be of length 10. Consider using 'processPhosphosites()'.")
   }
   
-  score_type <- match.arg(score_type)
+  scoreType <- match.arg(scoreType)
   
   checkmate::assert_class(BPPARAM, "BiocParallelParam")
   
-  scores <- BiocParallel::bplapply(
-    pwms, 
-    FUN = function(pwm, sites) {
-      .score_phosphosites(sites, pwm)
-    },
-    sites = splitted,
-    BPPARAM = BPPARAM)
+  scores <- .scoreMultiplePWM(splitted, pwms, BPPARAM)
   
-  if (score_type == "percentile") {
-    score_maps <- get_score_maps()
+  if (scoreType == "percentile") {
+    scoreMaps <- getScoreMaps()
     
-    if (!all(names(scores) %in% names(score_maps))) {
+    if (!all(names(scores) %in% names(scoreMaps))) {
       stop('Not all PWMs have score maps!')
     } 
-
-    scores <- BiocParallel::bpmapply(
-      FUN = function(score, score_map) {
-        score_map(score)
-      },
-      scores,
-      score_maps[names(scores)],
-      SIMPLIFY = FALSE,
-      USE.NAMES = TRUE,
-      BPPARAM = BPPARAM)
+    
+    scores <- .lodToPR(scores, scoreMaps, BPPARAM)
   }
   
   scores <- do.call(cbind, scores)

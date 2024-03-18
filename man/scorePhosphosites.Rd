@@ -15,7 +15,7 @@ scorePhosphosites(
 \item{pwms}{List with kinase PWMs as returned by \code{\link[=getKinasePWM]{getKinasePWM()}}.}
 
 \item{sites}{A character vector with phosphosites. Check
-\code{\link[=processPhosphosites]{processPhosphosites()}} for the correct phosphosite format.}
+\code{\link[=processPhosphopeptides]{processPhosphopeptides()}} for the correct phosphosite format.}
 
 \item{scoreType}{Percentile rank or log2-odds score.}
 
@@ -38,6 +38,6 @@ score <- scorePhosphosites(getKinasePWM(), c("TGRRHTLAEV", "LISAVSPEIR"))
 }
 \seealso{
 \code{\link[=getKinasePWM]{getKinasePWM()}} for getting a list of kinase PWMs,
-\code{\link[=processPhosphosites]{processPhosphosites()}} for the correct phosphosite format, and
+\code{\link[=processPhosphopeptides]{processPhosphopeptides()}} for the correct phosphosite format, and
 \code{\link[=getScoreMaps]{getScoreMaps()}} for mapping PWM scores to percentile ranks
 }

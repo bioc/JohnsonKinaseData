@@ -16,9 +16,12 @@ Imports:
     dplyr, 
     stats, 
     stringr, 
-    tidyr
-Suggests: 
+    tidyr,
+    purrr
+Suggests:
+    BiocStyle,
     ExperimentHubData,
+    knitr,
     testthat (>= 3.0.0)
 biocViews: ExperimentHub, Homo_sapiens_Data, Proteome
 VignetteBuilder: knitr

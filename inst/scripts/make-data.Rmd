@@ -151,8 +151,8 @@ length(sites) # reported in paper: 82,735 but is 85,603 unique sites in the tabl
 
 source(here::here('R','score_phosphosites.R')) # functionality to score sites
 
-PWM <- get_kinase_pwms()
-scores <- score_phosphosites(PWM, sites, type = 'log2_odds')
+PWM <- getKinasePWM()
+scores <- scorePhosphosites(PWM, sites, scoreType = 'lod')
   
 write.csv(data.frame(PhosphoSite = sites, scores), 
           file = gzfile(here::here('inst','extdata','JohnsonKinaseBackgroundScores.csv.gz')), 

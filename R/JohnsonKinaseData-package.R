@@ -7,8 +7,8 @@
 #'   It also includes pre-computed PWM scores ("background scores") for a large
 #'   collection of curated human phosphosites.
 #'
-#'   The package additonally offers functionality to match kinase PWMs against
-#'   user-provided phosphosites and to rank PWM scores relative to the
+#'   The package additionally offers functionality to match kinase PWMs against
+#'   user-provided phospho-peptides and to rank PWM scores relative to the
 #'   background scores ("percentile rank").
 #'
 #' @references Johnson, J.L., Yaron, T.M., Huntsman, E.M. et al. An atlas of

@@ -74,14 +74,13 @@ getScoreMaps <- function() {
 }
 
 
-#' Low level single PWM scoring function
+#' Low level single PWM scoring function. All unmatched characters (like "_" or
+#' ".") evaluate to NA and don't contribute to the score sum
 #' @noRd
 .scoreSinglePWM <- function(sites, pwm) {
   vapply(sites, 
          FUN=function(aa) {
            aa_score <- pwm[cbind(base::match(aa,rownames(pwm)), seq_along(aa))]
-           ## all unmatched characters (like "_" or ".") evaluate to NA and 
-           ## don't contribute to the score sum
            sum(aa_score, na.rm=TRUE) 
          }, 
          NA_real_)
@@ -124,7 +123,7 @@ getScoreMaps <- function() {
 #'
 #' @param pwms List with kinase PWMs as returned by [getKinasePWM()].
 #' @param sites A character vector with phosphosites. Check
-#'   [processPhosphosites()] for the correct phosphosite format.
+#'   [processPhosphopeptides()] for the correct phosphosite format.
 #' @param scoreType Percentile rank or log2-odds score.
 #' @param BPPARAM A BiocParallelParam object specifying how parallelization
 #'   should be performed.
@@ -135,11 +134,11 @@ getScoreMaps <- function() {
 #' @importFrom checkmate assert_character
 #' @importFrom checkmate assert_class
 #' @importFrom BiocParallel bplapply
-#' 
+#'
 #' @export
 #'
 #' @seealso [getKinasePWM()] for getting a list of kinase PWMs,
-#'   [processPhosphosites()] for the correct phosphosite format, and
+#'   [processPhosphopeptides()] for the correct phosphosite format, and
 #'   [getScoreMaps()] for mapping PWM scores to percentile ranks
 #'
 #' @examples
@@ -160,7 +159,7 @@ scorePhosphosites <- function(pwms, sites,
   splitted <- strsplit(sites, split="")
   
   if (!all(vapply(splitted, length, NA_integer_) == 10)) {
-    stop("'sites' elements are expected to be of length 10. Consider using 'processPhosphosites()'.")
+    stop("'sites' elements are expected to be of length 10. Consider using 'processPhosphopeptides()'.")
   }
   
   scoreType <- match.arg(scoreType)

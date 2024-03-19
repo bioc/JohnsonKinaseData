@@ -16,7 +16,7 @@ A character vector with the file path to the local cache of the annotation data.
 Internal accessor function.
 }
 \seealso{
-Use \code{\link{getKinaseAnnotation()}} to load the data.
+Use \code{\link[=getKinaseAnnotation]{getKinaseAnnotation()}} to load the data.
 }
 \examples{
 anno <- JohnsonKinaseAnnotation()

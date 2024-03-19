@@ -16,7 +16,7 @@ A character vector with the file path to the local cache of the PWM data.
 Internal cache accessor function.
 }
 \seealso{
-Use \code{\link{getKinasePWM()}} to load the data.
+Use \code{\link[=getKinasePWM]{getKinasePWM()}} to load the data.
 }
 \examples{
 data <- JohnsonKinasePWM()

@@ -6,7 +6,7 @@ Authors@R:
     person("Florian", "Geier", , "florian.geier@unibas.ch", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-9076-9264"))
 Description: The packages provides position specific weight matrices (PWMs) for 303 human serine/threonine kinases originally published in Johnson et al. 2023. It includes gene annotation for each kinase PWM and PWM matching scores for a set of 85603 curated human phosphosites which can be used to map a PWM score to its percentile rank. The package also includes basic functionality to score user provided phosphosites. 
-License: MIT License
+License: MIT + file LICENSE.md
 URL: https://github.com/fgeier/JohnsonKinaseData/
 BugReports: https://support.bioconductor.org/t/JohnsonKinaseData
 Imports: 

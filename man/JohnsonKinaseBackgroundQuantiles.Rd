@@ -16,7 +16,7 @@ A character vector with the file path to the local cache of background score qua
 Internal cache accessor function.
 }
 \seealso{
-Use \code{\link{getScoreMaps()}} to load the data.
+Use \code{\link[=getScoreMaps]{getScoreMaps()}} to load the data.
 }
 \examples{
 quants <- JohnsonKinaseBackgroundQuantiles()

@@ -1,5 +1,5 @@
 ---
-title: "JohnsonKinaseData"
+title: "Using `JohnsonKinaseData` to predict kinase-substrate relationships"
 author: "Florian Geier"
 date: "`r BiocStyle::doc_date()`"
 package: "`r BiocStyle::pkg_ver('JohnsonKinaseData')`"
@@ -43,7 +43,9 @@ Each PWM is a numeric matrix with amino acids as rows and positions as columns. 
 pwms[["PLK2"]]
 ```
 
-Beside the 20 standard amino acids, also phosphorylated serine, threonine and tyrosine residues are include. These phosphorylated residues are distinct from the central phospho-acceptor (serine/threonine at position `0`) and can have a strong impact on the affinity of a given kinase-substrate pair (phospho-priming). The central phospho-acceptor site is located at position `0` and only measures the relative favorability of serine over threonine. The user can exclude this favorability measure by setting the parameter `includeSTfavorability` to `FALSE`, in which case all central log2-odd scores are set to `NA`.
+Beside the 20 standard amino acids, also phosphorylated serine, threonine and tyrosine residues are included. These phosphorylated residues are distinct from the central phospho-acceptor (serine/threonine at position `0`) and can have a strong impact on the affinity of a given kinase-substrate pair (phospho-priming). 
+
+The central phospho-acceptor site is located at position `0` and only measures the relative favorability of serine over threonine. The user can exclude this favorability measure by setting the parameter `includeSTfavorability` to `FALSE`, in which case all central log2-odd scores are set to `NA`.
 
 ```{r, pwm-st}
 pwms2 <- getKinasePWM(includeSTfavorability=FALSE)
@@ -51,15 +53,43 @@ pwms2 <- getKinasePWM(includeSTfavorability=FALSE)
 
 # Processing user-provided phosphosites
 
-Phosphorylated peptides are often represented in two different formats: (1) the phosphorylated residue(s) are indicated by an asterix as in `SAGLLS*DEDC`. Alternatively, phosphorylated residues are indicated by lower case letters as in `SAGLLsDEDC`. In order to unify the phsophosite representation, \pkg{JohnsonKinaseData} provides the function `processPhosphopeptides()` which takes a character vector with phosphopeptides
+Phosphorylated peptides are often represented in two different formats: (1) the phosphorylated residues are indicated by an asterix as in `SAGLLS*DEDC`. Alternatively, phosphorylated residues are given by lower case letters as in `SAGLLsDEDC`. In order to unify the phosophosite representation for PWM matching, \pkg{JohnsonKinaseData} provides the function `processPhosphopeptides()`. It takes a character vector with phospho-peptides, aligns them to the central phospho-acceptor position and pads and/or truncates the surrounding residues, such that the processed site consists of 5 upstream residues, a central acceptor and 4 downstream residues. The central phospho-acceptor position is defined as the left closest position to the midpoint of the peptide given by `floor(nchar(sites)/2)+1`.
 
+```{r}
+ppeps <- c("SAGLLS*DEDC", "GDS*ND", "EKGDSN__", "___LySDEDC", "EKGtS*N")
 
-The user can provide phosphosites as a character vector. which are macthed against all 303 kinase PWMs. These have to be processed with the function `processPhosphosites`In order to math PWMs to user-provided phosphosites
+sites <- processPhosphopeptides(ppeps)
 
+sites
+```
+
+If a peptide contains several phosphorylated residues, option `onlyCentralAcceptor` controls how to select the acceptor position. Setting `onlyCentralAcceptor` to `FALSE` will return all possible aligned phosphosites for a given input peptide. Note that in this case the output is not parallel to the input.
+
+```{r}
+processPhosphopeptides("KART*LLS*DEC")
+processPhosphopeptides("KART*LLS*DEC", onlyCentralAcceptor = FALSE)
+```
 
 # Scoring of user-provided phosphosites
 
-# Outlook: kinase activity predictions
+Once peptides are processed to sites, the function `scorePhosphosites()` can be used to create a matrix of kinase-substrate match scores. 
+
+```{r}
+scores <- scorePhosphosites(pwms, sites$processed)
+
+dim(scores)
+
+head(scores[,1:5])
+```
+
+By default, the resulting score is the log2-odds score of the PWM. Alternatively, by setting `scoreType` to `percentile`, a percentile rank of the log2-odds score is calculated, using for each PWM a background score distribution which is derived by matching each PWM to the 85'603 unique phosphosites published in Johnson et al. 2023. 
+
+```{r}
+scores <- scorePhosphosites(pwms, sites$processed, scoreType = "percentile")
+head(scores[,1:5])
+```
+
+The percentile rank is the matching score underlying the kinase activity predictions published in Johnson et al. Note that these percentile ranks do not account for phospho-priming, as they were missing in the background sites published in Johnson et al.
 
 # Session info
 

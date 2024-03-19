@@ -11,7 +11,9 @@ A data frame with log2-odds scores per phosphosite (rows) and PWMs
 (columns)
 }
 \description{
-Get precomputed PWM scores for a large set of curated human phosphosites
+The background scores are derived from matching each PWM to the 85'603 unique
+phosphosites published in Johnson et al. 2023. The data frame contains the
+log2-odds score per phosphosite and PWM.
 }
 \examples{
 bg <- getBackgroundScores()

@@ -11,7 +11,9 @@ A data frame with columns MatrixName, GeneName, UniprotID, EntrezID,
 Description and KinaseFamily
 }
 \description{
-Get annnotation data for all 303 human serine/threonine kinase PWMs
+The annotation data records for each of the 303 human serine/threonine kinase
+PWMs originally published in Johnson et al. the PWM matrix name, gene symbol
+and description, Uniprot ID and Entrez ID as well as the kinase family.
 }
 \examples{
 anno <- getKinaseAnnotation()

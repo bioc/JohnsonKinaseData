@@ -1,16 +1,19 @@
 #' Get a list of position weight matrices (PWMs) for the 303 human
 #' serine/threonine kinases originally published in Johnson et al. 2023.
 #'
+#' Each PWM stores the log2-odds scores per residue (rows) and position
+#' (columns) in matrix format.
+#'
 #' @param includeSTfavorability Include serine vs. threonine favorability for
 #'   the central phospho-acceptor?
 #'
 #' @return A named list of numeric matrices (PWMs).
-#' 
+#'
 #' @importFrom checkmate assert_logical
 #' @importFrom dplyr select
 #' @importFrom dplyr pull
 #' @importFrom tidyr pivot_wider
-#' 
+#'
 #' @export
 #'
 #' @examples
@@ -124,7 +127,7 @@ getScoreMaps <- function() {
 #' @param pwms List with kinase PWMs as returned by [getKinasePWM()].
 #' @param sites A character vector with phosphosites. Check
 #'   [processPhosphopeptides()] for the correct phosphosite format.
-#' @param scoreType Percentile rank or log2-odds score.
+#' @param scoreType Log2-odds score or percentile rank.
 #' @param BPPARAM A BiocParallelParam object specifying how parallelization
 #'   should be performed.
 #'
@@ -134,6 +137,7 @@ getScoreMaps <- function() {
 #' @importFrom checkmate assert_character
 #' @importFrom checkmate assert_class
 #' @importFrom BiocParallel bplapply
+#' @importFrom BiocParallel MulticoreParam
 #'
 #' @export
 #'
@@ -144,7 +148,7 @@ getScoreMaps <- function() {
 #' @examples
 #' score <- scorePhosphosites(getKinasePWM(), c("TGRRHTLAEV", "LISAVSPEIR"))
 scorePhosphosites <- function(pwms, sites, 
-                              scoreType=c('percentile', 'lod'), 
+                              scoreType=c('lod', 'percentile'), 
                               BPPARAM=BiocParallel::MulticoreParam(1)) {
 
   checkmate::assert_list(pwms, types=c("numeric", "matrix"), 

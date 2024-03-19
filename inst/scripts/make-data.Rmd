@@ -155,7 +155,7 @@ PWM <- getKinasePWM()
 scores <- scorePhosphosites(PWM, sites, scoreType = 'lod')
   
 write.csv(data.frame(PhosphoSite = sites, scores), 
-          file = gzfile(here::here('inst','extdata','JohnsonKinaseBackgroundScores.csv.gz')), 
+          file = gzfile(here::here('inst','extdata','JohnsonKinaseBackgroundScores.csv.gz')),
           row.names = FALSE)
 
 ## compute quantiles

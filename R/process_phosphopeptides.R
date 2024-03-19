@@ -9,7 +9,7 @@
 #' `onlyCentralAcceptor` allows for two processing options: (1) By default, only
 #' the central phospho-acceptor of each phospho-peptide is considered. Here
 #' central is defined as the position left-closest to
-#' `floor(width(site)/2)+1`. (2) All phospho-acceptors are considered as central
+#' `floor(nchar(site)/2)+1`. (2) All phospho-acceptors are considered as central
 #' in which case the phospho-peptide is replicated and aligned for each of its
 #' phosphorylated residues. In this case the output sites are not in parallel to
 #' the input peptides.
@@ -45,7 +45,6 @@
 #' @importFrom dplyr select
 #' @importFrom dplyr full_join
 #' @importFrom dplyr join_by
-#' @importFrom stringr str_width
 #' @importFrom stringr str_count
 #' @importFrom stringr str_replace_all
 #' @importFrom stringr str_sub
@@ -72,7 +71,7 @@ processPhosphopeptides <- function(sites,
     dplyr::mutate(
       modified=stringr::str_replace_all(sites, 
                                         c('S\\*'='s', 'T\\*'='t', 'Y\\*'='y')),
-      center1=floor(stringr::str_width(modified)/2) + 1,
+      center1=floor(nchar(modified)/2) + 1,
       is_lower=stringr::str_count(modified, "[s,t,y]") > 0)
   
   locs <- data |>

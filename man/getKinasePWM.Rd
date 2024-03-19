@@ -15,8 +15,8 @@ the central phospho-acceptor?}
 A named list of numeric matrices (PWMs).
 }
 \description{
-Get a list of position weight matrices (PWMs) for the 303 human
-serine/threonine kinases originally published in Johnson et al. 2023.
+Each PWM stores the log2-odds scores per residue (rows) and position
+(columns) in matrix format.
 }
 \examples{
 pwms <- getKinasePWM()

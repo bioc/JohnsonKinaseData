@@ -7,7 +7,7 @@
 scorePhosphosites(
   pwms,
   sites,
-  scoreType = c("percentile", "lod"),
+  scoreType = c("lod", "percentile"),
   BPPARAM = BiocParallel::MulticoreParam(1)
 )
 }
@@ -17,7 +17,7 @@ scorePhosphosites(
 \item{sites}{A character vector with phosphosites. Check
 \code{\link[=processPhosphopeptides]{processPhosphopeptides()}} for the correct phosphosite format.}
 
-\item{scoreType}{Percentile rank or log2-odds score.}
+\item{scoreType}{Log2-odds score or percentile rank.}
 
 \item{BPPARAM}{A BiocParallelParam object specifying how parallelization
 should be performed.}

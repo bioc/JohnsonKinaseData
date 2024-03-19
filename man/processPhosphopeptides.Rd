@@ -32,7 +32,7 @@ If a peptide reports several phosphorylated residues, parameter
 \code{onlyCentralAcceptor} allows for two processing options: (1) By default, only
 the central phospho-acceptor of each phospho-peptide is considered. Here
 central is defined as the position left-closest to
-\code{floor(width(site)/2)+1}. (2) All phospho-acceptors are considered as central
+\code{floor(nchar(site)/2)+1}. (2) All phospho-acceptors are considered as central
 in which case the phospho-peptide is replicated and aligned for each of its
 phosphorylated residues. In this case the output sites are not in parallel to
 the input peptides.

@@ -20,10 +20,10 @@ distribution per PWM is derived from matching each PWM to the 85'603 unique
 phosphosites published in Johnson et al. 2023.
 }
 \details{
-Note that the background sites used by Johnson et al. do not contain any
-non-central phosphorylated residues (phospho-priming). Therefore any input
-sites which include phospho-priming will be capped to 100 percentile rank, if
-their PWM score exceeds the largest observed background score for that PWM.
+The background sites used by Johnson et al. do not contain any non-central
+phosphorylated residues (phospho-priming). Therefore any input sites which
+include phospho-priming will be capped to 100 percentile rank, if their PWM
+score exceeds the largest observed background score for that PWM.
 
 Internally, stats::approxfun is used to linearly interpolate between the PWM
 score and its 0.1\% - quantile in the distribution over background scores.

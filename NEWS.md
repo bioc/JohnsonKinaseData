@@ -1,3 +1,3 @@
-# JohnsonKinaseData 0.1.0
+# JohnsonKinaseData 0.99.0
 
 * Initial version

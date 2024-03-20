@@ -26,6 +26,18 @@ knitr::opts_chunk$set(
 
 Johnson et al. [@Johnson2023] published for 303 human serine/threonine specific kinases substrate affinities in the form of position-specific weight matrices (PWMs). The `r Biocpkg("JohnsonKinaseData")` package provides access to these PWMs including basic functionality to match user-provided phosphosites against all kinase PWMs. The aim is to give the user a simple way of predicting kinase-substrate relationships based on PWM-phosphosite matching. These predictions can serve to infer kinase activity from differential phospho-proteomic data. 
 
+# Installation
+
+The `r Biocpkg("JohnsonKinaseData")` package can be install using the following code:
+
+```{r installation, eval=FALSE}
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("ExperimentHub")
+BiocManager::install("JohnsonKinaseData")
+```
+
 # Loading kinase PWMs
 
 The kinase PWMs can be accessed with the `getKinasePWM()` function. It returns a list with 303 human serine/threonine specific PWMs. 

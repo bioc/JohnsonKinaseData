@@ -13,7 +13,7 @@ JohnsonKinaseAnnotation(metadata=FALSE)
 A character vector with the file path to the local cache of the annotation data.
 }
 \description{
-Internal accessor function.
+Internal cache accessor function.
 }
 \seealso{
 Use \code{\link[=getKinaseAnnotation]{getKinaseAnnotation()}} to load the data.

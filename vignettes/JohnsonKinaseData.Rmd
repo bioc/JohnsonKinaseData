@@ -1,5 +1,5 @@
 ---
-title: "Using `JohnsonKinaseData` to predict kinase-substrate relationships"
+title: "Using JohnsonKinaseData to predict kinase-substrate relationships"
 author: "Florian Geier"
 date: "`r BiocStyle::doc_date()`"
 package: "`r BiocStyle::pkg_ver('JohnsonKinaseData')`"
@@ -45,7 +45,7 @@ pwms[["PLK2"]]
 
 Beside the 20 standard amino acids, also phosphorylated serine, threonine and tyrosine residues are included. These phosphorylated residues are distinct from the central phospho-acceptor (serine/threonine at position `0`) and can have a strong impact on the affinity of a given kinase-substrate pair (phospho-priming). 
 
-The central phospho-acceptor site is located at position `0` and only measures the relative favorability of serine over threonine. The user can exclude this favorability measure by setting the parameter `includeSTfavorability` to `FALSE`, in which case all central log2-odd scores are set to `NA`.
+The central phospho-acceptor site is located at position `0` and only measures the favorability of serine over threonine. The user can exclude this favorability measure by setting the parameter `includeSTfavorability` to `FALSE`, in which case the central position doesn't contribute to the PWM score.
 
 ```{r, pwm-st}
 pwms2 <- getKinasePWM(includeSTfavorability=FALSE)
@@ -75,7 +75,11 @@ processPhosphopeptides("KART*LLS*DEC", onlyCentralAcceptor = FALSE)
 Once peptides are processed to sites, the function `scorePhosphosites()` can be used to create a matrix of kinase-substrate match scores. 
 
 ```{r}
-scores <- scorePhosphosites(pwms, sites$processed)
+selected <- sites |> 
+  dplyr::filter(acceptor %in% c('S','T')) |> 
+  pull(processed)
+
+scores <- scorePhosphosites(pwms, selected)
 
 dim(scores)
 
@@ -85,11 +89,14 @@ head(scores[,1:5])
 By default, the resulting score is the log2-odds score of the PWM. Alternatively, by setting `scoreType` to `percentile`, a percentile rank of the log2-odds score is calculated, using for each PWM a background score distribution which is derived by matching each PWM to the 85'603 unique phosphosites published in Johnson et al. 2023. 
 
 ```{r}
-scores <- scorePhosphosites(pwms, sites$processed, scoreType = "percentile")
+scores <- scorePhosphosites(pwms, selected, scoreType = "percentile")
+
 head(scores[,1:5])
 ```
 
-The percentile rank is the matching score underlying the kinase activity predictions published in Johnson et al. Note that these percentile ranks do not account for phospho-priming, as they were missing in the background sites published in Johnson et al.
+Quantifying PWM matches by percentile rank was first described in Jaffe et al. 2001 [@Jaffe2001]. It is also the matching score underlying the kinase activity predictions published in Johnson et al.
+
+Note that these percentile ranks cannot not account for phospho-priming, as non-central phosphorylated residues were missing in the background sites published in Johnson et al. I.e. the score distributions derived from the background sites do not reflect the impact of phospho-priming.
 
 # Session info
 

@@ -21,6 +21,10 @@ background scores ("percentile rank").
 Johnson, J.L., Yaron, T.M., Huntsman, E.M. et al. An atlas of
 substrate specificities for the human serine/threonine kinome. Nature 613,
 759–766 (2023). https://doi.org/10.1038/s41586-022-05575-3
+
+Yaffe, M., Leparc, G., Lai, J. et al. A motif-based profile scanning
+approach for genome-wide prediction of signaling pathways. Nat Biotechnol
+19, 348–353 (2001). https://doi.org/10.1038/86737
 }
 \seealso{
 Useful links:

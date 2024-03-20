@@ -19,9 +19,9 @@ Imports:
     tidyr,
     purrr
 Suggests:
+    knitr,
     BiocStyle,
     ExperimentHubData,
-    knitr,
     testthat (>= 3.0.0)
 biocViews: ExperimentHub, Homo_sapiens_Data, Proteome
 VignetteBuilder: knitr

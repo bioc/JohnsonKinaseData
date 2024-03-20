@@ -59,22 +59,22 @@ getKinasePWM <- function(includeSTfavorability=TRUE) {
 #' distribution per PWM is derived from matching each PWM to the 85'603 unique
 #' phosphosites published in Johnson et al. 2023.
 #'
-#' The background sites used by Johnson et al. do not contain any non-central
+#' The background sites used by Johnson et al. don't contain non-central
 #' phosphorylated residues (phospho-priming). Therefore any input sites which
 #' include phospho-priming will be capped to 100 percentile rank, if their PWM
 #' score exceeds the largest observed background score for that PWM.
-#' 
-#' Internally, [stats::approxfun] is used to linearly interpolate between the PWM
-#' score and its 0.1% - quantile in the distribution over background scores.
+#'
+#' Internally, [stats::approxfun] is used to linearly interpolate between the
+#' PWM score and its 0.1% - quantile in the distribution over background scores.
 #' This approximation allows for a lower memory footprint compared with the full
 #' set of background scores.
 #'
 #' @return A named list of functions, one for each kinase PWM. Each function is
 #'   taking a vector of PWM log2-odds scores and maps them to a percentile rank
 #'   in the range 0 to 100.
-#'   
+#'
 #' @importFrom stats approxfun
-#' 
+#'
 #' @export
 #'
 #' @examples

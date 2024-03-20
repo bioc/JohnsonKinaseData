@@ -30,8 +30,8 @@ A numeric matrix of size \code{length(sites)} times \code{length(pwms)}.
 phosphosites as input and returns a matrix of match scores per PWM and site.
 }
 \details{
-The match score is either the log2-odds score (\code{lod}) or the percentile
-rank (\code{percentile}) in the background score distribution.
+The match score is either the log2-odds score (\code{lod}) or the percentile rank
+(\code{percentile}) in the background score distribution.
 }
 \examples{
 score <- scorePhosphosites(getKinasePWM(), c("TGRRHTLAEV", "LISAVSPEIR"))

@@ -50,5 +50,5 @@ A warning is raised if the central phospho-acceptor is not serine or
 threonine, as these sites are not covered by the Johnson PWMs.
 }
 \examples{
-procSites <- processPhosphopeptides(c("SAGLLS*DEDC", "GDS*ND", "EKGDSN__", "___LySDEDC", "EKGtS*N"))
+procSites <- processPhosphopeptides(c("SAGLLS*DEDC", "EKGtS*N", "__LySDEDC"))
 }

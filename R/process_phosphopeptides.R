@@ -59,7 +59,7 @@
 #' @export
 #'
 #' @examples
-#' procSites <- processPhosphopeptides(c("SAGLLS*DEDC", "GDS*ND", "EKGDSN__", "___LySDEDC", "EKGtS*N"))
+#' procSites <- processPhosphopeptides(c("SAGLLS*DEDC", "EKGtS*N", "__LySDEDC"))
 processPhosphopeptides <- function(sites,
                                    onlyCentralAcceptor=TRUE,
                                    allowPhosphoPriming=TRUE) {
@@ -92,12 +92,20 @@ processPhosphopeptides <- function(sites,
                      by = dplyr::join_by(modified))
   
   data <- data |>
-    dplyr::mutate(left=stringr::str_sub(modified, end=dplyr::if_else(is_lower, center2, center1)),
-                  right=stringr::str_sub(modified, start=dplyr::if_else(is_lower, center2, center1)+1)) |>
-    dplyr::mutate(left=stringr::str_pad(left, pad='_', width=6, side="left"),
-                  left=stringr::str_trunc(left, width=6, side="left", ellipsis=""),
-                  right=stringr::str_pad(right, pad='_', width=4, side="right"),
-                  right=stringr::str_trunc(right, width=4, side="right", ellipsis=""),
+    dplyr::mutate(left=stringr::str_sub(modified, 
+                                        end=dplyr::if_else(
+                                          is_lower, center2, center1)),
+                  right=stringr::str_sub(modified, 
+                                         start=dplyr::if_else(
+                                           is_lower, center2, center1)+1)) |>
+    dplyr::mutate(left=stringr::str_pad(left, pad='_', 
+                                        width=6, side="left"),
+                  left=stringr::str_trunc(left, 
+                                          width=6, side="left", ellipsis=""),
+                  right=stringr::str_pad(right, pad='_', 
+                                         width=4, side="right"),
+                  right=stringr::str_trunc(right, 
+                                           width=4, side="right", ellipsis=""),
                   processed=stringr::str_c(left,right), 
                   acceptor=stringr::str_to_upper(
                     stringr::str_sub(processed, start=6, end=6)))

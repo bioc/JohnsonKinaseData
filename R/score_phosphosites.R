@@ -95,7 +95,8 @@ getScoreMaps <- function() {
 .scoreSinglePWM <- function(sites, pwm) {
   vapply(sites, 
          FUN=function(aa) {
-           aa_score <- pwm[cbind(base::match(aa,rownames(pwm)), seq_along(aa))]
+           aa_score <- pwm[cbind(base::match(aa,rownames(pwm)), 
+                                 seq_along(aa))]
            sum(aa_score, na.rm=TRUE) 
          }, 
          NA_real_)

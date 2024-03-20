@@ -22,7 +22,8 @@ Suggests:
     knitr,
     BiocStyle,
     ExperimentHubData,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    rmarkdown
 biocViews: ExperimentHub, Homo_sapiens_Data, Proteome
 VignetteBuilder: knitr
 Encoding: UTF-8

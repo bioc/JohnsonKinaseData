@@ -17,7 +17,8 @@ Imports:
     stats, 
     stringr, 
     tidyr,
-    purrr
+    purrr,
+    utils
 Suggests:
     knitr,
     BiocStyle,

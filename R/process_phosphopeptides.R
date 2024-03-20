@@ -63,62 +63,67 @@
 processPhosphopeptides <- function(sites,
                                    onlyCentralAcceptor=TRUE,
                                    allowPhosphoPriming=TRUE) {
-  
-  checkmate::assert_character(sites)
-  checkmate::assert_logical(allowPhosphoPriming)
-  
-  data <- tidyr::tibble(sites) |>
-    dplyr::mutate(
-      modified=stringr::str_replace_all(sites, 
-                                        c('S\\*'='s', 'T\\*'='t', 'Y\\*'='y')),
-      center1=floor(nchar(modified)/2) + 1,
-      is_lower=stringr::str_count(modified, "[s,t,y]") > 0)
-  
-  locs <- data |>
-    dplyr::mutate(hits=stringr::str_locate_all(modified, "[s,t,y]"),  
-                  center2=purrr::map(hits, function(df) df[,1])) |> 
-    tidyr::unnest(center2, keep_empty = TRUE) |>
-    dplyr::mutate(diff = abs(center2 - center1)) 
-  
-  if (onlyCentralAcceptor) {
-    locs <- locs |>
-      dplyr::group_by(modified) |>
-      dplyr::slice_min(diff, n=1, with_ties=TRUE) |>
-      dplyr::ungroup()
-  }
-  
-  data <- data |>
-    dplyr::full_join(locs |> dplyr::select(modified, center2),
-                     by = dplyr::join_by(modified))
-  
-  data <- data |>
-    dplyr::mutate(left=stringr::str_sub(modified, 
-                                        end=dplyr::if_else(
-                                          is_lower, center2, center1)),
-                  right=stringr::str_sub(modified, 
-                                         start=dplyr::if_else(
-                                           is_lower, center2, center1)+1)) |>
-    dplyr::mutate(left=stringr::str_pad(left, pad='_', 
-                                        width=6, side="left"),
-                  left=stringr::str_trunc(left, 
-                                          width=6, side="left", ellipsis=""),
-                  right=stringr::str_pad(right, pad='_', 
-                                         width=4, side="right"),
-                  right=stringr::str_trunc(right, 
-                                           width=4, side="right", ellipsis=""),
-                  processed=stringr::str_c(left,right), 
-                  acceptor=stringr::str_to_upper(
-                    stringr::str_sub(processed, start=6, end=6)))
-  
-  stringr::str_sub(data$processed, start=6, end=6) <- (data |> pull(acceptor))
-  
-  if (any(!data$acceptor %in% c('S','T')))
-    warning('No S/T at central phospho-acceptor position.')
-  
-  if (!allowPhosphoPriming) {
-    data <- data |> 
-      dplyr::mutate(processed=stringr::str_to_upper(processed)) 
-  }
-  
-  data |> dplyr::select(sites, processed, acceptor)
+    
+    checkmate::assert_character(sites)
+    checkmate::assert_logical(allowPhosphoPriming)
+    
+    data <- tidyr::tibble(sites) |>
+        dplyr::mutate(
+            modified=stringr::str_replace_all(sites, 
+                                              c('S\\*'='s', 'T\\*'='t', 
+                                                'Y\\*'='y')),
+            center1=floor(nchar(modified)/2) + 1,
+            is_lower=stringr::str_count(modified, "[s,t,y]") > 0)
+    
+    locs <- data |>
+        dplyr::mutate(hits=stringr::str_locate_all(modified, "[s,t,y]"),  
+                      center2=purrr::map(hits, function(df) df[,1])) |> 
+        tidyr::unnest(center2, keep_empty = TRUE) |>
+        dplyr::mutate(diff = abs(center2 - center1)) 
+    
+    if (onlyCentralAcceptor) {
+        locs <- locs |>
+            dplyr::group_by(modified) |>
+            dplyr::slice_min(diff, n=1, with_ties=TRUE) |>
+            dplyr::ungroup()
+    }
+    
+    data <- data |>
+        dplyr::full_join(locs |> dplyr::select(modified, center2),
+                         by = dplyr::join_by(modified))
+    
+    data <- data |>
+        dplyr::mutate(left=stringr::str_sub(modified, 
+                                            end=dplyr::if_else(
+                                                is_lower, 
+                                                center2, 
+                                                center1)),
+                      right=stringr::str_sub(modified, 
+                                             start=dplyr::if_else(
+                                                 is_lower, 
+                                                 center2, 
+                                                 center1)+1)) |>
+        dplyr::mutate(left=stringr::str_pad(left, pad='_', 
+                                            width=6, side="left"),
+                      left=stringr::str_trunc(left, width=6, 
+                                              side="left", ellipsis=""),
+                      right=stringr::str_pad(right, pad='_', 
+                                             width=4, side="right"),
+                      right=stringr::str_trunc(right, width=4, 
+                                               side="right", ellipsis=""),
+                      processed=stringr::str_c(left,right), 
+                      acceptor=stringr::str_to_upper(
+                          stringr::str_sub(processed, start=6, end=6)))
+    
+    stringr::str_sub(data$processed, start=6, end=6) <- (data |> pull(acceptor))
+    
+    if (any(!data$acceptor %in% c('S','T')))
+        warning('No S/T at central phospho-acceptor position.')
+    
+    if (!allowPhosphoPriming) {
+        data <- data |> 
+            dplyr::mutate(processed=stringr::str_to_upper(processed)) 
+    }
+    
+    data |> dplyr::select(sites, processed, acceptor)
 }

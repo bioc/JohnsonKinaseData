@@ -32,22 +32,22 @@
 #' pwms <- getKinasePWM()
 getKinasePWM <- function(includeSTfavorability=TRUE) {
   
-  checkmate::assert_logical(includeSTfavorability)
-  
-  pwms <- read.csv( JohnsonKinasePWM() )
-  
-  ## convert to a list of numeric matrices
-  lapply(split(pwms, pwms$Matrix), function(x) {
-    x <- x |> 
-      dplyr::select(-Matrix) |> 
-      tidyr::pivot_wider(values_from=Score, 
-                         names_from=Position) 
-    y <- as.matrix(x |> dplyr::select(-AA))
-    rownames(y) <- x |> dplyr::pull(AA)
-    if (!includeSTfavorability)
-      y[,'0'] <- NA_real_
-    y
-  })
+    checkmate::assert_logical(includeSTfavorability)
+    
+    pwms <- read.csv( JohnsonKinasePWM() )
+    
+    ## convert to a list of numeric matrices
+    lapply(split(pwms, pwms$Matrix), function(x) {
+        x <- x |> 
+            dplyr::select(-Matrix) |> 
+            tidyr::pivot_wider(values_from=Score, 
+                               names_from=Position) 
+        y <- as.matrix(x |> dplyr::select(-AA))
+        rownames(y) <- x |> dplyr::pull(AA)
+        if (!includeSTfavorability)
+            y[,'0'] <- NA_real_
+        y
+    })
 }
 
 #' Map log2-odds score to percentile rank
@@ -80,12 +80,12 @@ getKinasePWM <- function(includeSTfavorability=TRUE) {
 #' @examples
 #' maps <- getScoreMaps()
 getScoreMaps <- function() {
-  PR <- read.csv( JohnsonKinaseBackgroundQuantiles() )
-  lapply(PR[,-1], function(score, quant) {
-    stats::approxfun(score, quant, 
-                     yleft=0, yright=100, 
-                     ties=min)
-  }, quant = 100 * PR[,"Quantiles"])
+    PR <- read.csv( JohnsonKinaseBackgroundQuantiles() )
+    lapply(PR[,-1], function(score, quant) {
+        stats::approxfun(score, quant, 
+                         yleft=0, yright=100, 
+                         ties=min)
+    }, quant = 100 * PR[,"Quantiles"])
 }
 
 
@@ -93,40 +93,40 @@ getScoreMaps <- function() {
 #' ".") evaluate to NA and don't contribute to the score sum
 #' @noRd
 .scoreSinglePWM <- function(sites, pwm) {
-  vapply(sites, 
-         FUN=function(aa) {
-           aa_score <- pwm[cbind(base::match(aa,rownames(pwm)), 
-                                 seq_along(aa))]
-           sum(aa_score, na.rm=TRUE) 
-         }, 
-         NA_real_)
+    vapply(sites, 
+           FUN=function(aa) {
+               aa_score <- pwm[cbind(base::match(aa,rownames(pwm)), 
+                                     seq_along(aa))]
+               sum(aa_score, na.rm=TRUE) 
+           }, 
+           NA_real_)
 }
 
 #' Low level multiple PWM scoring function
 #' @noRd
 .scoreMultiplePWM <- function(sites, pwms, BPPARAM) {
-  BiocParallel::bplapply(
-    pwms,
-    FUN=function(pwm, sites) {
-      .scoreSinglePWM(sites, pwm)
-    },
-    sites=sites,
-    BPPARAM=BPPARAM
-  )
+    BiocParallel::bplapply(
+        pwms,
+        FUN=function(pwm, sites) {
+            .scoreSinglePWM(sites, pwm)
+        },
+        sites=sites,
+        BPPARAM=BPPARAM
+    )
 }
 
 #' log2-odds to percentile rank
 #' @noRd
 .lodToPR <- function(scores, scoreMaps, BPPARAM) {
-  BiocParallel::bpmapply(
-    FUN=function(score, scoreMap) {
-      scoreMap(score)
-    },
-    scores,
-    scoreMaps[names(scores)],
-    SIMPLIFY=FALSE,
-    USE.NAMES=TRUE,
-    BPPARAM=BPPARAM)
+    BiocParallel::bpmapply(
+        FUN=function(score, scoreMap) {
+            scoreMap(score)
+        },
+        scores,
+        scoreMaps[names(scores)],
+        SIMPLIFY=FALSE,
+        USE.NAMES=TRUE,
+        BPPARAM=BPPARAM)
 }
 
 #' Match kinase PWMs to processed phosphosites
@@ -163,40 +163,40 @@ getScoreMaps <- function() {
 scorePhosphosites <- function(pwms, sites, 
                               scoreType=c('lod', 'percentile'), 
                               BPPARAM=BiocParallel::SerialParam()) {
-
-  checkmate::assert_list(pwms, types=c("numeric", "matrix"), 
-                         unique=TRUE, any.missing=FALSE, names='named')
-  
-  if (!all(vapply(pwms, ncol, NA_integer_) == 10)) {
-    stop('PWMs have incorrect dimension!')
-  }
-  
-  checkmate::assert_character(sites)
-  
-  splitted <- strsplit(sites, split="")
-  
-  if (!all(vapply(splitted, length, NA_integer_) == 10)) {
-    stop("'sites' elements are expected to be of length 10. Consider using 'processPhosphopeptides()'.")
-  }
-  
-  scoreType <- match.arg(scoreType)
-  
-  checkmate::assert_class(BPPARAM, "BiocParallelParam")
-  
-  scores <- .scoreMultiplePWM(splitted, pwms, BPPARAM)
-  
-  if (scoreType == "percentile") {
-    scoreMaps <- getScoreMaps()
     
-    if (!all(names(scores) %in% names(scoreMaps))) {
-      stop('Not all PWMs have score maps!')
-    } 
+    checkmate::assert_list(pwms, types=c("numeric", "matrix"), 
+                           unique=TRUE, any.missing=FALSE, names='named')
     
-    scores <- .lodToPR(scores, scoreMaps, BPPARAM)
-  }
-  
-  scores <- do.call(cbind, scores)
-  dimnames(scores) <- list(sites, names(pwms))
-  
-  scores
+    if (!all(vapply(pwms, ncol, NA_integer_) == 10)) {
+        stop('PWMs have incorrect dimension!')
+    }
+    
+    checkmate::assert_character(sites)
+    
+    splitted <- strsplit(sites, split="")
+    
+    if (!all(vapply(splitted, length, NA_integer_) == 10)) {
+        stop("'sites' elements are expected to be of length 10. Consider using 'processPhosphopeptides()'.")
+    }
+    
+    scoreType <- match.arg(scoreType)
+    
+    checkmate::assert_class(BPPARAM, "BiocParallelParam")
+    
+    scores <- .scoreMultiplePWM(splitted, pwms, BPPARAM)
+    
+    if (scoreType == "percentile") {
+        scoreMaps <- getScoreMaps()
+        
+        if (!all(names(scores) %in% names(scoreMaps))) {
+            stop('Not all PWMs have score maps!')
+        } 
+        
+        scores <- .lodToPR(scores, scoreMaps, BPPARAM)
+    }
+    
+    scores <- do.call(cbind, scores)
+    dimnames(scores) <- list(sites, names(pwms))
+    
+    scores
 }

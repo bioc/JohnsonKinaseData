@@ -77,7 +77,7 @@ Once peptides are processed to sites, the function `scorePhosphosites()` can be 
 ```{r}
 selected <- sites |> 
   dplyr::filter(acceptor %in% c('S','T')) |> 
-  pull(processed)
+  dplyr::pull(processed)
 
 scores <- scorePhosphosites(pwms, selected)
 
@@ -85,6 +85,8 @@ dim(scores)
 
 head(scores[,1:5])
 ```
+
+The PWM scoring can be parallelized by supplying a `BiocParallelParam` object to the BPPARAM parameter. 
 
 By default, the resulting score is the log2-odds score of the PWM. Alternatively, by setting `scoreType` to `percentile`, a percentile rank of the log2-odds score is calculated, using for each PWM a background score distribution which is derived by matching each PWM to the 85'603 unique phosphosites published in Johnson et al. 2023. 
 

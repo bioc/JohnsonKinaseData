@@ -8,7 +8,7 @@ scorePhosphosites(
   pwms,
   sites,
   scoreType = c("lod", "percentile"),
-  BPPARAM = BiocParallel::MulticoreParam(1)
+  BPPARAM = BiocParallel::SerialParam()
 )
 }
 \arguments{
@@ -19,8 +19,8 @@ scorePhosphosites(
 
 \item{scoreType}{Log2-odds score or percentile rank.}
 
-\item{BPPARAM}{A BiocParallelParam object specifying how parallelization
-should be performed.}
+\item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying how
+parallelization should be performed.}
 }
 \value{
 A numeric matrix of size \code{length(sites)} times \code{length(kinases)}.

@@ -140,8 +140,8 @@ getScoreMaps <- function() {
 #' @param sites A character vector with phosphosites. Check
 #'   [processPhosphopeptides()] for the correct phosphosite format.
 #' @param scoreType Log2-odds score or percentile rank.
-#' @param BPPARAM A BiocParallelParam object specifying how parallelization
-#'   should be performed.
+#' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying how
+#'   parallelization should be performed.
 #'
 #' @return A numeric matrix of size `length(sites)` times `length(kinases)`.
 #'
@@ -149,7 +149,7 @@ getScoreMaps <- function() {
 #' @importFrom checkmate assert_character
 #' @importFrom checkmate assert_class
 #' @importFrom BiocParallel bplapply
-#' @importFrom BiocParallel MulticoreParam
+#' @importFrom BiocParallel SerialParam
 #'
 #' @export
 #'
@@ -161,7 +161,7 @@ getScoreMaps <- function() {
 #' score <- scorePhosphosites(getKinasePWM(), c("TGRRHTLAEV", "LISAVSPEIR"))
 scorePhosphosites <- function(pwms, sites, 
                               scoreType=c('lod', 'percentile'), 
-                              BPPARAM=BiocParallel::MulticoreParam(1)) {
+                              BPPARAM=BiocParallel::SerialParam()) {
 
   checkmate::assert_list(pwms, types=c("numeric", "matrix"), 
                          unique=TRUE, any.missing=FALSE, names='named')

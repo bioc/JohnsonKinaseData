@@ -25,7 +25,7 @@ phosphorylated residues (phospho-priming). Therefore any input sites which
 include phospho-priming will be capped to 100 percentile rank, if their PWM
 score exceeds the largest observed background score for that PWM.
 
-Internally, stats::approxfun is used to linearly interpolate between the PWM
+Internally, \link[stats:approxfun]{stats::approxfun} is used to linearly interpolate between the PWM
 score and its 0.1\% - quantile in the distribution over background scores.
 This approximation allows for a lower memory footprint compared with the full
 set of background scores.

@@ -22,9 +22,9 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Intro
+# Introduction
 
-Johnson et al. [@Johnson2023] published for 303 human serine/threonine specific kinases subtrate affinities in the form of position-specific weight matrices (PWMs). The \pkg{JohnsonKinaseData} package provides access to these PWMs including basic functionality to match user-provided phosphosites against all kinase PWMs. The aim is to give the user a simple way of predicting kinase-substrate relationships based on PWM-phosphosite matching. These predictions can serve to infer kinase activity from differential phospho-proteomic data. 
+Johnson et al. [@Johnson2023] published for 303 human serine/threonine specific kinases substrate affinities in the form of position-specific weight matrices (PWMs). The `r Biocpkg("JohnsonKinaseData")` package provides access to these PWMs including basic functionality to match user-provided phosphosites against all kinase PWMs. The aim is to give the user a simple way of predicting kinase-substrate relationships based on PWM-phosphosite matching. These predictions can serve to infer kinase activity from differential phospho-proteomic data. 
 
 # Loading kinase PWMs
 
@@ -53,7 +53,7 @@ pwms2 <- getKinasePWM(includeSTfavorability=FALSE)
 
 # Processing user-provided phosphosites
 
-Phosphorylated peptides are often represented in two different formats: (1) the phosphorylated residues are indicated by an asterix as in `SAGLLS*DEDC`. Alternatively, phosphorylated residues are given by lower case letters as in `SAGLLsDEDC`. In order to unify the phosophosite representation for PWM matching, \pkg{JohnsonKinaseData} provides the function `processPhosphopeptides()`. It takes a character vector with phospho-peptides, aligns them to the central phospho-acceptor position and pads and/or truncates the surrounding residues, such that the processed site consists of 5 upstream residues, a central acceptor and 4 downstream residues. The central phospho-acceptor position is defined as the left closest position to the midpoint of the peptide given by `floor(nchar(sites)/2)+1`.
+Phosphorylated peptides are often represented in two different formats: (1) the phosphorylated residues are indicated by an asterix as in `SAGLLS*DEDC`. Alternatively, phosphorylated residues are given by lower case letters as in `SAGLLsDEDC`. In order to unify the phosophosite representation for PWM matching, `r Biocpkg("JohnsonKinaseData")` provides the function `processPhosphopeptides()`. It takes a character vector with phospho-peptides, aligns them to the central phospho-acceptor position and pads and/or truncates the surrounding residues, such that the processed site consists of 5 upstream residues, a central acceptor and 4 downstream residues. The central phospho-acceptor position is defined as the left closest position to the midpoint of the peptide given by `floor(nchar(sites)/2)+1`.
 
 ```{r}
 ppeps <- c("SAGLLS*DEDC", "GDS*ND", "EKGDSN__", "___LySDEDC", "EKGtS*N")
@@ -63,11 +63,11 @@ sites <- processPhosphopeptides(ppeps)
 sites
 ```
 
-If a peptide contains several phosphorylated residues, option `onlyCentralAcceptor` controls how to select the acceptor position. Setting `onlyCentralAcceptor` to `FALSE` will return all possible aligned phosphosites for a given input peptide. Note that in this case the output is not parallel to the input.
+If a peptide contains several phosphorylated residues, option `onlyCentralAcceptor` controls how to select the acceptor position. Setting `onlyCentralAcceptor=FALSE` will return all possible aligned phosphosites for a given input peptide. Note that in this case the output is not parallel to the input.
 
 ```{r}
 processPhosphopeptides("KART*LLS*DEC")
-processPhosphopeptides("KART*LLS*DEC", onlyCentralAcceptor = FALSE)
+processPhosphopeptides("KART*LLS*DEC", onlyCentralAcceptor=FALSE)
 ```
 
 # Scoring of user-provided phosphosites
@@ -86,21 +86,21 @@ dim(scores)
 head(scores[,1:5])
 ```
 
-The PWM scoring can be parallelized by supplying a `BiocParallelParam` object to the 'BPPARAM' parameter. 
+The PWM scoring can be parallelized by supplying a `BiocParallelParam` object to `BPPARAM=`. 
 
 ```{r}
 scores <- scorePhosphosites(pwms, selected, BPPARAM=BiocParallel::SerialParam())
 ```
 
-By default, the resulting score is the log2-odds score of the PWM. Alternatively, by setting `scoreType` to `percentile`, a percentile rank of the log2-odds score is calculated, using for each PWM a background score distribution which is derived by matching each PWM to the 85'603 unique phosphosites published in Johnson et al. 2023. 
+By default, the resulting score is the log2-odds score of the PWM. Alternatively, by setting `scoreType="percentile"`, a percentile rank of the log2-odds score is calculated, using for each PWM a background score distribution which is derived by matching each PWM to the 85'603 unique phosphosites published in Johnson et al. 2023. 
 
 ```{r}
-scores <- scorePhosphosites(pwms, selected, scoreType = "percentile")
+scores <- scorePhosphosites(pwms, selected, scoreType="percentile")
 
 head(scores[,1:5])
 ```
 
-Quantifying PWM matches by percentile rank was first described in Jaffe et al. 2001 [@Jaffe2001]. It is also the matching score underlying the kinase activity predictions published in Johnson et al.
+Quantifying PWM matches by percentile rank was first described in Jaffe et al. 2001 [@Jaffe2001]. It is also the matching score underlying the kinase activity predictions published in Johnson et al. 2023 [@Johnson2023].
 
 Note that these percentile ranks cannot not account for phospho-priming, as non-central phosphorylated residues were missing in the background sites published in Johnson et al. I.e. the score distributions derived from the background sites do not reflect the impact of phospho-priming.
 

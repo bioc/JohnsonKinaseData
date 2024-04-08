@@ -112,7 +112,7 @@ scores <- scorePhosphosites(pwms, selected, scoreType="percentile")
 head(scores[,1:5])
 ```
 
-Quantifying PWM matches by percentile rank was first described in Jaffe et al. 2001 [@Jaffe2001]. It is also the matching score underlying the kinase activity predictions published in Johnson et al. 2023 [@Johnson2023].
+Quantifying PWM matches by percentile rank was first described in Yaffe et al. 2001 [@Yaffe2001]. It is also the matching score underlying the kinase activity predictions published in Johnson et al. 2023 [@Johnson2023].
 
 Note that these percentile ranks do not account for phospho-priming, as non-central phosphorylated residues were missing in the background sites published in Johnson et al. I.e. the score distributions derived from the background sites do not reflect the impact of phospho-priming.
 

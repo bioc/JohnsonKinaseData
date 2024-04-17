@@ -16,7 +16,7 @@ processPhosphopeptides(
 \item{onlyCentralAcceptor}{Process only the central phospho-acceptor residue?}
 
 \item{allowPhosphoPriming}{Allow phospho-acceptors at non-central positions?
-These should be indicated by the lower case letters "s", "t" or "y".}
+These should be indicated by the lower case letters s, t or y.}
 }
 \value{
 A tibble with columns: \code{sites}, \code{processed}, \code{acceptor}
@@ -31,24 +31,28 @@ y) or the phosphorylated residue is followed by an asterisk (S*, T* or Y*).
 If a peptide reports several phosphorylated residues, parameter
 \code{onlyCentralAcceptor} allows for two processing options: (1) By default, only
 the central phospho-acceptor of each phospho-peptide is considered. Here
-central is defined as the position left-closest to
-\code{floor(nchar(site)/2)+1}. (2) All phospho-acceptors are considered as central
-in which case the phospho-peptide is replicated and aligned for each of its
-phosphorylated residues. In this case the output sites are not in parallel to
-the input peptides.
+central is defined as the left-closest position to \code{floor(nchar(site)/2)+1}.
+(2) All phospho-acceptors are considered as central in which case the
+phospho-peptide is replicated and aligned for each of its phosphorylated
+residues. In this case the output sites are not in parallel to the input
+peptides.
 
 In both cases, non-central phospho-acceptors are indicated by lower case
 letters (s, t, or y). These residues enable phospho-priming of the site. If
 phospho-priming is disabled (parameter \code{allowPhosphoPriming}) these residues
 are converted to upper case letters.
 
+If a site does not follow the phosphorylation patterns described above, the
+central residue defined by position \code{floor(nchar(site)/2)+1} is considered
+the default phospho-acceptor site.
+
 The input sites are truncated and/or padded such that the processed sites are
 of width 10 and have the central phospho-acceptor surrounded by 5 upstream
-and 4 downstream residues, as required for PWM macthing.
+and 4 downstream residues, as required for PWM matching.
 
 A warning is raised if the central phospho-acceptor is not serine or
 threonine, as these sites are not covered by the Johnson PWMs.
 }
 \examples{
-procSites <- processPhosphopeptides(c("SAGLLS*DEDC", "EKGtS*N", "__LySDEDC"))
+procSites <- processPhosphopeptides(c("SAGLLS*DEDC", "RtEKGS*N", "EKGDSN__"))
 }

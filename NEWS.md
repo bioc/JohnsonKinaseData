@@ -1,6 +1,11 @@
+# JohnsonKinaseData 0.99.3
+
+* Fix selection of left-most central acceptor
+* Add documentation of phospho-peptide processing
+
 # JohnsonKinaseData 0.99.2
 
-* Fis misspelled reference in vignette
+* Fix misspelled reference in vignette
 
 # JohnsonKinaseData 0.99.1
 

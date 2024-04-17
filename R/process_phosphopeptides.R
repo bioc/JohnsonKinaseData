@@ -1,5 +1,5 @@
 #' processPhosphopetides
-#' 
+#'
 #' Process phospho-peptides to a common format used for PWM matching
 #'
 #' Phosphorylated residues are recognized either by lower case letters (s, t or
@@ -8,20 +8,24 @@
 #' If a peptide reports several phosphorylated residues, parameter
 #' `onlyCentralAcceptor` allows for two processing options: (1) By default, only
 #' the central phospho-acceptor of each phospho-peptide is considered. Here
-#' central is defined as the position left-closest to
-#' `floor(nchar(site)/2)+1`. (2) All phospho-acceptors are considered as central
-#' in which case the phospho-peptide is replicated and aligned for each of its
-#' phosphorylated residues. In this case the output sites are not in parallel to
-#' the input peptides.
+#' central is defined as the left-closest position to `floor(nchar(site)/2)+1`.
+#' (2) All phospho-acceptors are considered as central in which case the
+#' phospho-peptide is replicated and aligned for each of its phosphorylated
+#' residues. In this case the output sites are not in parallel to the input
+#' peptides.
 #'
 #' In both cases, non-central phospho-acceptors are indicated by lower case
 #' letters (s, t, or y). These residues enable phospho-priming of the site. If
 #' phospho-priming is disabled (parameter `allowPhosphoPriming`) these residues
 #' are converted to upper case letters.
 #'
+#' If a site does not follow the phosphorylation patterns described above, the 
+#' central residue defined by position `floor(nchar(site)/2)+1` is considered 
+#' the default phospho-acceptor site.
+#'
 #' The input sites are truncated and/or padded such that the processed sites are
 #' of width 10 and have the central phospho-acceptor surrounded by 5 upstream
-#' and 4 downstream residues, as required for PWM macthing.
+#' and 4 downstream residues, as required for PWM matching.
 #'
 #' A warning is raised if the central phospho-acceptor is not serine or
 #' threonine, as these sites are not covered by the Johnson PWMs.
@@ -29,7 +33,7 @@
 #' @param sites Character vector with phospho-peptides
 #' @param onlyCentralAcceptor Process only the central phospho-acceptor residue?
 #' @param allowPhosphoPriming Allow phospho-acceptors at non-central positions?
-#'   These should be indicated by the lower case letters "s", "t" or "y".
+#'   These should be indicated by the lower case letters s, t or y.
 #'
 #' @return A tibble with columns: `sites`, `processed`, `acceptor`
 #'
@@ -59,7 +63,7 @@
 #' @export
 #'
 #' @examples
-#' procSites <- processPhosphopeptides(c("SAGLLS*DEDC", "EKGtS*N", "__LySDEDC"))
+#' procSites <- processPhosphopeptides(c("SAGLLS*DEDC", "RtEKGS*N", "EKGDSN__"))
 processPhosphopeptides <- function(sites,
                                    onlyCentralAcceptor=TRUE,
                                    allowPhosphoPriming=TRUE) {
@@ -78,13 +82,15 @@ processPhosphopeptides <- function(sites,
     locs <- data |>
         dplyr::mutate(hits=stringr::str_locate_all(modified, "[s,t,y]"),  
                       center2=purrr::map(hits, function(df) df[,1])) |> 
-        tidyr::unnest(center2, keep_empty = TRUE) |>
-        dplyr::mutate(diff = abs(center2 - center1)) 
+        tidyr::unnest(center2, keep_empty=TRUE) |>
+        dplyr::mutate(diff=abs(center2 - center1)) 
     
     if (onlyCentralAcceptor) {
         locs <- locs |>
             dplyr::group_by(modified) |>
-            dplyr::slice_min(diff, n=1, with_ties=TRUE) |>
+            dplyr::slice_min(diff, with_ties=TRUE) |>
+            dplyr::arrange(center2) |>
+            dplyr::slice_head() |>
             dplyr::ungroup()
     }
     
@@ -115,7 +121,7 @@ processPhosphopeptides <- function(sites,
                       acceptor=stringr::str_to_upper(
                           stringr::str_sub(processed, start=6, end=6)))
     
-    stringr::str_sub(data$processed, start=6, end=6) <- (data |> pull(acceptor))
+    stringr::str_sub(data$processed, start=6, end=6) <- (data |> dplyr::pull(acceptor))
     
     if (any(!data$acceptor %in% c('S','T')))
         warning('No S/T at central phospho-acceptor position.')

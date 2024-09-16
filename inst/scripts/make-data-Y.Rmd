@@ -1,0 +1,170 @@
+---
+title: "Download and preprocess the supplemental tables in Yaron-Barir et al. 2024 (doi:10.1038/s41586-024-07407-y)"
+author: "Florian Geier"
+date: "16.September.2024"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(width = 100)
+```
+
+```{r setup}
+library(here) # set relative locations
+
+library(readxl) # read raw data (excel files)
+library(dplyr)
+library(tidyr)
+library(stringr)
+
+library(Homo.sapiens) # add kinase gene annotations
+```
+
+## Download raw data
+
+```{r download_data}
+here::i_am('inst/scripts/make-data-Y.Rmd')
+
+download.file(url='https://static-content.springer.com/esm/art%3A10.1038%2Fs41586-024-07407-y/MediaObjects/41586_2024_7407_MOESM3_ESM.xlsx',
+              destfile=here::here('inst','extdata','41586_2024_7407_MOESM3_ESM.xlsx'))
+
+download.file(url='https://static-content.springer.com/esm/art%3A10.1038%2Fs41586-024-07407-y/MediaObjects/41586_2024_7407_MOESM4_ESM.xlsx', 
+              destfile=here::here('inst','extdata','41586_2024_7407_MOESM4_ESM.xlsx'))
+
+download.file(url='https://static-content.springer.com/esm/art%3A10.1038%2Fs41586-024-07407-y/MediaObjects/41586_2024_7407_MOESM5_ESM.xlsx',
+              destfile=here::here('inst','extdata','41586_2024_7407_MOESM5_ESM.xlsx'))
+```
+
+## Kinase annotation
+
+- Extract annotation for each kinase matrix and add Entrez ID and gene descriptions from Bioc annotation databases.
+
+- Fix a couple of wrong gene symbols by hand
+
+```{r kinase_annotation}
+anno <- readxl::read_excel(here::here('inst','extdata','41586_2024_7407_MOESM3_ESM.xlsx'), 
+                           sheet='Table_S1_Data')
+anno <- anno |>
+  dplyr::filter(Species %in% c('human','Tribolium castaneum') & !is.na(UNIPROT_ID)) |> # kinase PWM available 
+  dplyr::mutate(MatrixName = MATRIX_NAME,
+                UniprotID = UNIPROT_ID,
+                GeneName = GENENAME,
+                KinaseSubType = SUBTYPE,
+                KinaseFamily = FAMILY) |>
+  dplyr::select(MatrixName, GeneName, UniprotID, KinaseSubType, KinaseFamily) 
+
+## correct by hand wrong entries
+anno$GeneName[anno$GeneName == "IRR"] <- "INSRR" # insulin receptor related receptor
+anno$MatrixName[anno$GeneName == "MST1R"] <- "MST1R" ## wrong MatrixName (RON)
+anno$GeneName[anno$GeneName == "MKK4"] <- "MAP2K4" # mitogen-activated protein kinase kinase 
+anno$GeneName[anno$GeneName == "MKK6"] <- "MAP2K6"
+anno$GeneName[anno$GeneName == "MKK7"] <- "MAP2K7"
+anno$GeneName[anno$GeneName == "PDHK1"] <- "PDK1" # pyruvate dehydrogenase kinase 
+anno$GeneName[anno$GeneName == "PDHK3"] <- "PDK3"
+anno$GeneName[anno$GeneName == "PDHK4"] <- "PDK4"
+
+## add '_TYR' to non-canonical TK MatrixName
+anno <- anno |> 
+    dplyr::mutate(MatrixName = ifelse(KinaseSubType == 'ncTK', paste0(MatrixName, '_TYR'), MatrixName))  
+
+## add EntrezID and gene description
+sel <- AnnotationDbi::select(Homo.sapiens, 
+                             keys = anno |> dplyr::pull(GeneName), 
+                             keytype = "SYMBOL", 
+                             columns = c("GENEID","GENENAME"))
+## remove wrong gene for symbol TEC
+sel <- sel[!sel$GENEID == "100124696",] 
+
+df <- anno |> 
+  dplyr::left_join(sel, by = join_by(GeneName == SYMBOL)) |>
+  dplyr::rename(Description = GENENAME, EntrezID = GENEID) |>
+  dplyr::relocate(EntrezID, Description, .after = UniprotID)
+
+write.csv(df, 
+          file = here::here('inst','extdata','TyrosineKinaseAnnotation.csv'), 
+          row.names = FALSE)
+```
+
+## Process tyrosine kinase matrices
+
+- PWMs are taken from `tyrosine_all_norm_scaled_matric` sheet.
+
+- The PWMs contain lower case letters for phosphorylated, non-central S/T/Y residues.
+
+```{r process_pwm}
+data_scaled <- readxl::read_excel(here::here('inst','extdata','41586_2024_7407_MOESM4_ESM.xlsx'),
+                                  sheet='tyrosine_all_norm_scaled_matric') |>
+  dplyr::rename(Matrix = 1) |> 
+  tidyr::pivot_longer(cols = -Matrix,
+                      names_to = "Position",
+                      values_to = "Score") |>
+  tidyr::separate_wider_regex(cols = "Position", 
+                              patterns = c(Position = "[^A-z]+", 
+                                           AA = "[A-z]+")) |>
+  dplyr::mutate(Position = as.integer(Position)) # 
+
+PWM <- data_scaled |> 
+  dplyr::mutate(Score = log2(Score)) |>
+  dplyr::arrange(Matrix, Position, AA)
+
+write.csv(PWM, 
+          file = gzfile(here::here('inst','extdata','TyrosineKinasePWM.csv.gz')), 
+          row.names = FALSE)
+```
+
+## PWM background scores
+
+- Background peptide sequences are taken from the `SITE_+/-7_AA`
+  column of the corresponding excel sheet, and the central 11 AA are
+  extracted (central phosphosite at position 6)
+
+- Next, all kinase PWMs defined above are matched against all unique
+  background peptides
+
+- The resulting score vectors are combine into a data frame and saved.
+
+```{r background_scores}
+background <- readxl::read_excel(here::here('inst','extdata',"41586_2024_7407_MOESM5_ESM.xlsx"),
+                                 sheet=2)
+
+sites <- background |>
+  dplyr::mutate(sites = stringr::str_sub(background$`SITE_+/-7_AA`, start = 3, end = 13)) |>
+  dplyr::pull(sites) |>
+  unique()
+
+length(sites) # reported in paper: 7,315 but is 6659 unique sites in the table
+
+source(here::here('R','score_phosphosites.R')) # functionality to score sites
+
+pwms <- read.csv(here::here('inst','extdata','TyrosineKinasePWM.csv.gz'))
+PWM <- lapply(split(pwms, pwms$Matrix), function(x) {
+    x <- x |> 
+        dplyr::select(-Matrix) |> 
+        tidyr::pivot_wider(values_from=Score, 
+                           names_from=Position) |>
+        dplyr::mutate(`0` = NA_real_, .before=`1`)
+    y <- as.matrix(x |> dplyr::select(-AA))
+    rownames(y) <- x |> dplyr::pull(AA)
+    y
+})
+    
+scores <- scorePhosphosites(PWM, sites, scoreType = 'lod')
+  
+write.csv(data.frame(PhosphoSite = sites, scores), 
+          file = gzfile(here::here('inst','extdata','TyrosineKinaseBackgroundScores.csv.gz')),
+          row.names = FALSE)
+
+## compute quantiles
+probs <- seq(0,1,length.out=1001)
+quants <- sapply(colnames(scores), function(x)  quantile(scores[,x], probs))
+write.csv(data.frame(Quantiles = probs, quants), 
+          file = gzfile(here::here('inst','extdata','TyrosineKinaseBackgroundQuantiles.csv.gz')), 
+          row.names = FALSE)
+```
+
+## Session information
+
+```{r session_info}
+sessionInfo()
+```

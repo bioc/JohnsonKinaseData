@@ -24,16 +24,20 @@
 #' the default phospho-acceptor site.
 #'
 #' The input sites are truncated and/or padded such that the processed sites are
-#' of width 10 and have the central phospho-acceptor surrounded by 5 upstream
-#' and 4 downstream residues, as required for PWM matching.
+#' of width upstream+downstream+1. By default the central phospho-acceptor is 
+#' surrounded by 5 upstream and 5 downstream residues.
 #'
-#' A warning is raised if the central phospho-acceptor is not serine or
-#' threonine, as these sites are not covered by the Johnson PWMs.
+#' A warning is raised if the central phospho-acceptor is not serine, threonine 
+#' or tyrosine.
 #'
 #' @param sites Character vector with phospho-peptides
 #' @param onlyCentralAcceptor Process only the central phospho-acceptor residue?
 #' @param allowPhosphoPriming Allow phospho-acceptors at non-central positions?
 #'   These should be indicated by the lower case letters s, t or y.
+#' @param upstream Number of bases upstream of central phospho-acceptor in the 
+#'   processed output
+#' @param downstream Number of bases downstream of central phospho-acceptor in 
+#'   the processed output
 #'
 #' @return A tibble with columns: `sites`, `processed`, `acceptor`
 #'
@@ -63,19 +67,23 @@
 #' @export
 #'
 #' @examples
-#' procSites <- processPhosphopeptides(c("SAGLLS*DEDC", "RtEKGS*N", "EKGDSN__"))
+#' procSites <- processPhosphopeptides(c("AGLLS*DEDC", "RtEKGS*N", "ETGKDN"))
 processPhosphopeptides <- function(sites,
                                    onlyCentralAcceptor=TRUE,
-                                   allowPhosphoPriming=TRUE) {
+                                   allowPhosphoPriming=TRUE,
+                                   upstream=5L,
+                                   downstream=5L) {
     
     checkmate::assert_character(sites)
     checkmate::assert_logical(allowPhosphoPriming)
+    checkmate::assert_numeric(upstream, lower=0, len=1)
+    checkmate::assert_numeric(downstream, lower=0, len=1)
     
     data <- tidyr::tibble(sites) |>
         dplyr::mutate(
             modified=stringr::str_replace_all(sites, 
-                                              c('S\\*'='s', 'T\\*'='t', 
-                                                'Y\\*'='y')),
+                                              c('[S,s]\\*'='s', '[T,t]\\*'='t', 
+                                                '[Y,y]\\*'='y')),
             center1=floor(nchar(modified)/2) + 1,
             is_lower=stringr::str_count(modified, "[s,t,y]") > 0)
     
@@ -110,21 +118,24 @@ processPhosphopeptides <- function(sites,
                                                  center2, 
                                                  center1)+1)) |>
         dplyr::mutate(left=stringr::str_pad(left, pad='_', 
-                                            width=6, side="left"),
-                      left=stringr::str_trunc(left, width=6, 
+                                            width=upstream+1, side="left"),
+                      left=stringr::str_trunc(left, width=upstream+1, 
                                               side="left", ellipsis=""),
                       right=stringr::str_pad(right, pad='_', 
-                                             width=4, side="right"),
-                      right=stringr::str_trunc(right, width=4, 
+                                             width=downstream, side="right"),
+                      right=stringr::str_trunc(right, width=downstream, 
                                                side="right", ellipsis=""),
                       processed=stringr::str_c(left,right), 
                       acceptor=stringr::str_to_upper(
-                          stringr::str_sub(processed, start=6, end=6)))
+                          stringr::str_sub(processed, 
+                                           start=upstream+1, 
+                                           end=upstream+1)))
     
-    stringr::str_sub(data$processed, start=6, end=6) <- (data |> dplyr::pull(acceptor))
+    stringr::str_sub(data$processed, start=upstream+1, end=upstream+1) <- 
+        (data |> dplyr::pull(acceptor))
     
-    if (any(!data$acceptor %in% c('S','T')))
-        warning('No S/T at central phospho-acceptor position.')
+    if (any(!data$acceptor %in% c('S','T','K')))
+        warning('No S/T/K at central phospho-acceptor position.')
     
     if (!allowPhosphoPriming) {
         data <- data |> 

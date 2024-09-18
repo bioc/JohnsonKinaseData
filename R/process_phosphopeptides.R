@@ -24,8 +24,8 @@
 #' the default phospho-acceptor site.
 #'
 #' The input sites are truncated and/or padded such that the processed sites are
-#' of width upstream+downstream+1. By default the central phospho-acceptor is 
-#' surrounded by 5 upstream and 5 downstream residues.
+#' of width `upstream`+`downstream`+1. By default the central phospho-acceptor 
+#' is surrounded by 5 upstream and 5 downstream residues.
 #'
 #' A warning is raised if the central phospho-acceptor is not serine, threonine 
 #' or tyrosine.
@@ -79,44 +79,48 @@ processPhosphopeptides <- function(sites,
     checkmate::assert_numeric(upstream, lower=0, len=1)
     checkmate::assert_numeric(downstream, lower=0, len=1)
     
+    ## unify acceptor pattern
     data <- tidyr::tibble(sites) |>
         dplyr::mutate(
             modified=stringr::str_replace_all(sites, 
                                               c('[S,s]\\*'='s', '[T,t]\\*'='t', 
                                                 '[Y,y]\\*'='y')),
-            center1=floor(nchar(modified)/2) + 1,
+            center_pos=floor(nchar(modified)/2) + 1,
             is_lower=stringr::str_count(modified, "[s,t,y]") > 0)
     
+    ## find possible acceptor locations
     locs <- data |>
         dplyr::mutate(hits=stringr::str_locate_all(modified, "[s,t,y]"),  
-                      center2=purrr::map(hits, function(df) df[,1])) |> 
-        tidyr::unnest(center2, keep_empty=TRUE) |>
-        dplyr::mutate(diff=abs(center2 - center1)) 
+                      acceptor_pos=purrr::map(hits, function(df) df[,1])) |> 
+        tidyr::unnest(acceptor_pos, keep_empty=TRUE) |>
+        dplyr::mutate(acceptor_pos=dplyr::if_else(is_lower, 
+                                                  acceptor_pos, 
+                                                  center_pos)) 
     
     if (onlyCentralAcceptor) {
+        ## select left-closest acceptor to central position 
         locs <- locs |>
             dplyr::group_by(modified) |>
+            dplyr::mutate(diff=abs(acceptor_pos - center_pos)) |>
             dplyr::slice_min(diff, with_ties=TRUE) |>
-            dplyr::arrange(center2) |>
+            dplyr::arrange(acceptor_pos) |>
             dplyr::slice_head() |>
             dplyr::ungroup()
     }
     
     data <- data |>
-        dplyr::full_join(locs |> dplyr::select(modified, center2),
+        dplyr::full_join(locs |> dplyr::select(modified, acceptor_pos),
                          by = dplyr::join_by(modified))
     
+    ## split sites in left and right parts
     data <- data |>
         dplyr::mutate(left=stringr::str_sub(modified, 
-                                            end=dplyr::if_else(
-                                                is_lower, 
-                                                center2, 
-                                                center1)),
+                                            end=acceptor_pos),
                       right=stringr::str_sub(modified, 
-                                             start=dplyr::if_else(
-                                                 is_lower, 
-                                                 center2, 
-                                                 center1)+1)) |>
+                                             start=acceptor_pos+1))
+                      
+    ## pad left/right parts to match upstream/downstream conditions
+    data <- data |>
         dplyr::mutate(left=stringr::str_pad(left, pad='_', 
                                             width=upstream+1, side="left"),
                       left=stringr::str_trunc(left, width=upstream+1, 

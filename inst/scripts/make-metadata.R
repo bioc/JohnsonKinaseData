@@ -121,7 +121,7 @@ metadata <- HubPub::hub_metadata(
     RDataClass = "character",
     DispatchClass = "FilePath",
     Location_Prefix = "https://zenodo.org/",
-    RDataPath = "records/13768763/files/TyrosineKinaseAnnotation.csv",
+    RDataPath = "records/13785426/files/TyrosineKinaseAnnotation.csv",
     Tags = "Proteomics:Phosohosite:Tyrosine:Kinase activity:Position weight matrix:PWM"
 )
 
@@ -144,7 +144,7 @@ metadata <- HubPub::hub_metadata(
     RDataClass = "character",
     DispatchClass = "FilePath",
     Location_Prefix = "https://zenodo.org/",
-    RDataPath = "records/13768763/files/TyrosineKinasePWM.csv.gz",
+    RDataPath = "records/13785426/files/TyrosineKinasePWM.csv.gz",
     Tags = "Proteomics:Phosohosite:Tyrosine:Kinase activity:Position weight matrix:PWM"
 )
 
@@ -167,7 +167,7 @@ metadata <- HubPub::hub_metadata(
     RDataClass = "character",
     DispatchClass = "FilePath",
     Location_Prefix = "https://zenodo.org/",
-    RDataPath = "records/13768763/files/TyrosineKinaseBackgroundScores.csv.gz",
+    RDataPath = "records/13785426/files/TyrosineKinaseBackgroundScores.csv.gz",
     Tags = "Proteomics:Phosohosite:Tyrosine:Kinase activity:Position weight matrix:PWM"
 )
 
@@ -190,7 +190,7 @@ metadata <- HubPub::hub_metadata(
     RDataClass = "character",
     DispatchClass = "FilePath",
     Location_Prefix = "https://zenodo.org/",
-    RDataPath = "records/13768763/files/TyrosineKinaseBackgroundQuantiles.csv.gz",
+    RDataPath = "records/13785426/files/TyrosineKinaseBackgroundQuantiles.csv.gz",
     Tags = "Proteomics:Phosohosite:Tyrosine:Kinase activity:Position weight matrix:PWM"
 )
 

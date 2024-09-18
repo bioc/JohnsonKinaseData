@@ -102,10 +102,13 @@ data_scaled <- readxl::read_excel(here::here('inst','extdata','41586_2024_7407_M
   tidyr::separate_wider_regex(cols = "Position", 
                               patterns = c(Position = "[^A-z]+", 
                                            AA = "[A-z]+")) |>
-  dplyr::mutate(Position = as.integer(Position)) # 
-
+  dplyr::mutate(Position = factor(Position, ## add central acceptor position
+                                  levels=seq(-5,5))) |> 
+  tidyr::complete(Matrix, Position, AA, fill=list(Score=NA_real_)) 
+    
 PWM <- data_scaled |> 
-  dplyr::mutate(Score = log2(Score)) |>
+  dplyr::mutate(Score = log2(Score),
+                Position = as.integer(as.character(Position))) |>
   dplyr::arrange(Matrix, Position, AA)
 
 write.csv(PWM, 
@@ -142,8 +145,7 @@ PWM <- lapply(split(pwms, pwms$Matrix), function(x) {
     x <- x |> 
         dplyr::select(-Matrix) |> 
         tidyr::pivot_wider(values_from=Score, 
-                           names_from=Position) |>
-        dplyr::mutate(`0` = NA_real_, .before=`1`)
+                           names_from=Position) 
     y <- as.matrix(x |> dplyr::select(-AA))
     rownames(y) <- x |> dplyr::pull(AA)
     y

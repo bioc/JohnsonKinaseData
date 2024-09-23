@@ -12,7 +12,7 @@ writeLines(paste(names(hub_metadata()), collapse = ","),
 
 # Ser/Thr kinase annotation
 metadata <- HubPub::hub_metadata(
-  Title = ".JohnsonKinaseAnnotation",
+  Title = "JohnsonKinaseAnnotation",
   Description = "Annotation data for each ser/thr kinase PWM published in Johnson et al. 2023",
   BiocVersion = "3.20",
   Genome = NA_character_,
@@ -35,7 +35,7 @@ HubPub::add_resource(here::here(), metadata)
 
 # Ser/Thr kinase PWMs
 metadata <- HubPub::hub_metadata(
-  Title = ".JohnsonKinasePWM",
+  Title = "JohnsonKinasePWM",
   Description = "List of Ser/Thr kinase position weight matrices (PWMs) published in Johnson et al. 2023",
   BiocVersion = "3.20",
   Genome = NA_character_,
@@ -58,7 +58,7 @@ HubPub::add_resource(here::here(), metadata)
 
 # Ser/Thr kinase background scores
 metadata <- HubPub::hub_metadata(
-  Title = ".JohnsonKinaseBackgroundScores",
+  Title = "JohnsonKinaseBackgroundScores",
   Description = "Matrix of PWM scores on a set of background phosphosites published in Johnson et al. 2023",
   BiocVersion = "3.20",
   Genome = NA_character_,
@@ -81,7 +81,7 @@ HubPub::add_resource(here::here(), metadata)
 
 # Ser/Thr kinase background score quantiles
 metadata <- HubPub::hub_metadata(
-  Title = ".JohnsonKinaseBackgroundQuantiles",
+  Title = "JohnsonKinaseBackgroundQuantiles",
   Description = "Matrix of PWM score quantiles on a set of background phosphosites published in Johnson et al. 2023",
   BiocVersion = "3.20",
   Genome = NA_character_,
@@ -106,7 +106,7 @@ HubPub::add_resource(here::here(), metadata)
 
 # Tyr kinase annotation
 metadata <- HubPub::hub_metadata(
-    Title = ".TyrosineKinaseAnnotation",
+    Title = "TyrosineKinaseAnnotation",
     Description = "Annotation data for each tyrosine kinase PWM published in Yaron-Barir et al. 2024",
     BiocVersion = "3.20",
     Genome = NA_character_,
@@ -129,7 +129,7 @@ HubPub::add_resource(here::here(), metadata)
 
 # Tyr kinase PWMs
 metadata <- HubPub::hub_metadata(
-    Title = ".TyrosineKinasePWM",
+    Title = "TyrosineKinasePWM",
     Description = "List of tyrosine kinase position weight matrices (PWMs) published in Yaron-Barir et al. 2024",
     BiocVersion = "3.20",
     Genome = NA_character_,
@@ -152,7 +152,7 @@ HubPub::add_resource(here::here(), metadata)
 
 # Tyr kinase background scores
 metadata <- HubPub::hub_metadata(
-    Title = ".TyrosineKinaseBackgroundScores",
+    Title = "TyrosineKinaseBackgroundScores",
     Description = "Matrix of PWM scores on a set of background phosphosites published in Yaron-Barir et al. 2024",
     BiocVersion = "3.20",
     Genome = NA_character_,
@@ -175,7 +175,7 @@ HubPub::add_resource(here::here(), metadata)
 
 # Tyr kinase background score quantiles
 metadata <- HubPub::hub_metadata(
-    Title = ".TyrosineKinaseBackgroundQuantiles",
+    Title = "TyrosineKinaseBackgroundQuantiles",
     Description = "Matrix of PWM score quantiles on a set of background phosphosites published in Yaron-Barir et al. 2024",
     BiocVersion = "3.20",
     Genome = NA_character_,

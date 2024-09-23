@@ -1,8 +1,9 @@
 #' JohnsonKinaseData
 #'
 #' @description The \pkg{JohnsonKinaseData} package provides position specific
-#'   weight matrices (PWMs) for 303 human serine/threonine kinases originally
-#'   published in Johnson et al. 2023.
+#'   weight matrices (PWMs) for 303 human serine/threonine and 93 tyrosine
+#'   kinases originally published in Johnson et al. 2023. and Yaron-Barir et a.
+#'   2024
 #'
 #'   It also includes pre-computed PWM scores ("background scores") for a large
 #'   collection of curated human phosphosites.
@@ -14,6 +15,10 @@
 #' @references Johnson, J.L., Yaron, T.M., Huntsman, E.M. et al. An atlas of
 #'   substrate specificities for the human serine/threonine kinome. Nature 613,
 #'   759–766 (2023). https://doi.org/10.1038/s41586-022-05575-3
+#'
+#'   Yaron-Barir, T.M., Joughin, B.A., Huntsman, E.M. et al. The intrinsic
+#'   substrate specificity of the human tyrosine kinome. Nature 629, 1174–1181
+#'   (2024). https://doi.org/10.1038/s41586-024-07407-y
 #'
 #'   Yaffe, M., Leparc, G., Lai, J. et al. A motif-based profile scanning
 #'   approach for genome-wide prediction of signaling pathways. Nat Biotechnol

@@ -39,14 +39,14 @@
 #' @examples
 #' anno <- getKinaseAnnotation()
 getKinaseAnnotation <- function() {
-    st <- read.csv( .JohnsonKinaseAnnotation() )
-    st <- dplyr::mutate(AcceptorSpecificity = 'Ser/Thr', 
+    st <- read.csv( .JohnsonKinaseAnnotation() ) |>
+        dplyr::mutate(AcceptorSpecificity = 'Ser/Thr', 
                         KinaseSubType = NA,
-                        .after='EntrezID')
+                        .after='Description')
     
-    ty <- read.csv( .TyrosineKinaseAnnotation() )
-    ty <- dplyr::mutate(AcceptorSpecificity = 'Tyr', 
-                        .after='EntrezID') |>
+    ty <- read.csv( .TyrosineKinaseAnnotation() ) |>
+        dplyr::mutate(AcceptorSpecificity = 'Tyr', 
+                        .after='Description')
 
     dplyr::bind_rows(st, ty)
  }

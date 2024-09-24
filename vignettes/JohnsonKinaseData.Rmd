@@ -30,7 +30,7 @@ The `r Biocpkg("JohnsonKinaseData")` package provides substrate affinities in th
 
 The `r Biocpkg("JohnsonKinaseData")` package can be installed using the following code:
 
-```{r installation, eval=FALSE}
+```{r, installation, eval=FALSE}
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
@@ -57,7 +57,7 @@ xtabs(~AcceptorSpecificity, anno)
 
 Tyrosine specific kinase PWMs are additionally classified by sub-type: receptor (RTK), non-receptor (nRTK) and non-canonical tyrosine kinases (ncTK).
 
-```{r, anno-spec}
+```{r, anno-spec-sub}
 xtabs(~AcceptorSpecificity + KinaseSubType, anno)
 ```
 
@@ -65,7 +65,7 @@ PWMs for non-canonical tyrosine kinases, i.e. kinases which also phosphorylate s
 
 All PWMs are grouped into kinase families:
 
-```{r, anno-spec}
+```{r, anno-spec-family}
 xtabs(~AcceptorSpecificity + KinaseFamily, anno)
 ```
 
@@ -82,7 +82,7 @@ head(names(pwms))
 
 Each PWM is a numeric matrix with amino acids as rows and positions as columns. Matrix elements are log2-odd scores measuring differential affinity relative to a random frequency of amino acids [@Johnson2023]. 
 
-```{r pwm-example}
+```{r, pwm-example}
 pwms[["PLK2"]]
 ```
 
@@ -153,7 +153,7 @@ scores[,1:5]
 
 Quantifying PWM matches by percentile rank was first described in Yaffe et al. 2001 [@Yaffe2001]. The background score distributions used here are derived from matching each PWM to either the 85'603 unique phosphosites published in Johnson et al. 2023 (serine/threonine PWMs) or the 6659 unique phosphosites published in Yaron-Barir et al. 2024 (tyrosine PWMs). They can be accessed with:
 
-```{r, score-percentile}
+```{r, background-tyr}
 bg <- getBackgroundScores(phosphoAcceptor='Tyr')
 ```
 
@@ -163,7 +163,7 @@ Note that these percentile ranks do not account for phospho-priming, as non-cent
 
 # Session info
 
-```{r session-info}
+```{r, session-info}
 sessionInfo()
 ```
 

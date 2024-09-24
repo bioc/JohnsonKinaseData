@@ -7,7 +7,9 @@
 processPhosphopeptides(
   sites,
   onlyCentralAcceptor = TRUE,
-  allowPhosphoPriming = TRUE
+  allowPhosphoPriming = TRUE,
+  upstream = 5L,
+  downstream = 5L
 )
 }
 \arguments{
@@ -17,6 +19,12 @@ processPhosphopeptides(
 
 \item{allowPhosphoPriming}{Allow phospho-acceptors at non-central positions?
 These should be indicated by the lower case letters s, t or y.}
+
+\item{upstream}{Number of bases upstream of central phospho-acceptor in the
+processed output}
+
+\item{downstream}{Number of bases downstream of central phospho-acceptor in
+the processed output}
 }
 \value{
 A tibble with columns: \code{sites}, \code{processed}, \code{acceptor}
@@ -47,12 +55,12 @@ central residue defined by position \code{floor(nchar(site)/2)+1} is considered
 the default phospho-acceptor site.
 
 The input sites are truncated and/or padded such that the processed sites are
-of width 10 and have the central phospho-acceptor surrounded by 5 upstream
-and 4 downstream residues, as required for PWM matching.
+of width \code{upstream}+\code{downstream}+1. By default the central phospho-acceptor
+is surrounded by 5 upstream and 5 downstream residues.
 
-A warning is raised if the central phospho-acceptor is not serine or
-threonine, as these sites are not covered by the Johnson PWMs.
+A warning is raised if the central phospho-acceptor is not serine, threonine
+or tyrosine.
 }
 \examples{
-procSites <- processPhosphopeptides(c("SAGLLS*DEDC", "RtEKGS*N", "EKGDSN__"))
+procSites <- processPhosphopeptides(c("AGLLS*DEDC", "RtEKGS*N", "ETGKDN"))
 }

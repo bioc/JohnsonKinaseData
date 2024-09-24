@@ -2,18 +2,27 @@
 % Please edit documentation in R/zzz.R
 \name{getKinaseAnnotation}
 \alias{getKinaseAnnotation}
-\title{Get annnotation data for all 303 human serine/threonine kinase PWMs}
+\title{Get annnotation data for all kinase PWMs}
 \usage{
 getKinaseAnnotation()
 }
 \value{
 A data frame with columns MatrixName, GeneName, UniprotID, EntrezID,
-Description and KinaseFamily
+Description, AcceptorSpecificity, KinaseSubType and KinaseFamily
 }
 \description{
-The annotation data records for each of the 303 human serine/threonine kinase
-PWMs originally published in Johnson et al. the PWM matrix name, gene symbol
-and description, Uniprot ID and Entrez ID as well as the kinase family.
+The annotation data records for each kinase PWM, the PWM matrix name, gene
+symbol and description, Uniprot ID, Entrez ID, acceptor specificity, kinase
+sub-type, as well as the kinase family.
+}
+\details{
+Kinase PWMs are either serine/threonine or tyrosine specific in their central
+phospho-acceptor. For dual-specific kinases, the tyrosine-specific PWM is
+indicated by the '_TYR' suffix in the PWM name.
+
+Tyrosine kinases are further distinguished by sub-type and include receptor
+tyrosine kinases (RTK), non-receptor tyrosine kinases (nRTK) and
+non-canonical tyrosine kinases (ncTK) with dual-specificity.
 }
 \examples{
 anno <- getKinaseAnnotation()

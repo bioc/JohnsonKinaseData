@@ -2,19 +2,40 @@
 % Please edit documentation in R/zzz.R
 \name{getBackgroundScores}
 \alias{getBackgroundScores}
-\title{Get precomputed PWM scores for a large set of curated human phosphosites}
+\title{Get precomputed PWM scores for two sets of curated human phosphosites}
 \usage{
-getBackgroundScores()
+getBackgroundScores(phosphoAcceptor = c("Ser/Thr", "Tyr"))
+}
+\arguments{
+\item{phosphoAcceptor}{Return background scores for either Ser/Thr or Tyr
+phosphosites}
 }
 \value{
 A data frame with log2-odds scores per phosphosite (rows) and PWMs
 (columns)
 }
 \description{
-The background scores are derived from matching each PWM to the 85'603 unique
-phosphosites published in Johnson et al. 2023. The data frame contains the
-log2-odds score per phosphosite and PWM.
+Two sets of background scores are provided:
+}
+\details{
+\enumerate{
+\item Ser/Thr phosphosites published in Johnson et al. 2023 2. Tyr phosphosites
+published in Yaron-Barir et al. 2024
+}
+
+The background scores are derived from matching the corresponding PWMs to
+each of the sets. The resulting data frames contain the log2-odds score per
+phosphosite and PWM.
 }
 \examples{
 bg <- getBackgroundScores()
+}
+\references{
+Johnson, J.L., Yaron, T.M., Huntsman, E.M. et al. An atlas of
+substrate specificities for the human serine/threonine kinome. Nature 613,
+759–766 (2023). https://doi.org/10.1038/s41586-022-05575-3
+
+Yaron-Barir, T.M., Joughin, B.A., Huntsman, E.M. et al. The intrinsic
+substrate specificity of the human tyrosine kinome. Nature 629, 1174–1181
+(2024). https://doi.org/10.1038/s41586-024-07407-y
 }

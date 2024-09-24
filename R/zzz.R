@@ -89,7 +89,7 @@ getBackgroundScores <- function(phosphoAcceptor = c('Ser/Thr','Tyr')) {
     
     checkmate::assert_choice(phosphoAcceptor = c('Ser/Thr','Tyr'))
     
-    if (phosphoAcceptor = 'Ser/Thr') {
+    if (phosphoAcceptor == 'Ser/Thr') {
         read.csv( .JohnsonKinaseBackgroundScores() )        
     } else {
         read.csv( .TyrosineKinaseBackgroundScores() )   

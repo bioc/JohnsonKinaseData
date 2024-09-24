@@ -8,8 +8,8 @@ getScoreMaps()
 }
 \value{
 A named list of functions, one for each kinase PWM. Each function is
-taking a vector of log2-odds scores and maps them to a percentile rank in
-the range 0 to 100.
+taking a vector of log2-odds scores as input and returns the corresponding
+percentile ranks.
 }
 \description{
 For each kinase PWM, get a function that maps its log2-odds score to the

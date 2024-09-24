@@ -4,7 +4,7 @@
     ## create hub accessors from titles as internal functions    
     ns <- asNamespace(pkgname)
     for (title in titles) {
-        interal <- paste0('.',title)
+        interal <- paste0('.', title)
         assign(interal, ExperimentHub:::.hubAccessorFactory(pkgname, title), 
                envir = ns)
         namespaceExport(ns, interal)
@@ -84,10 +84,10 @@ getKinaseAnnotation <- function() {
 #' @export
 #'
 #' @examples
-#' bg <- getBackgroundScores()
+#' bg <- getBackgroundScores(phosphoAcceptor='Tyr')
 getBackgroundScores <- function(phosphoAcceptor = c('Ser/Thr','Tyr')) {
     
-    checkmate::assert_choice(phosphoAcceptor = c('Ser/Thr','Tyr'))
+    checkmate::assert_choice(phosphoAcceptor, choices=c('Ser/Thr','Tyr'))
     
     if (phosphoAcceptor == 'Ser/Thr') {
         read.csv( .JohnsonKinaseBackgroundScores() )        

@@ -3,8 +3,8 @@
 `JohnsonKinaseData` is an
 R/[ExperimentHub](https://bioconductor.org/packages/release/bioc/html/ExperimentHub.html)
 package providing access to position specific weight matrices (PWMs) for 303 
-human  serine/threonine and 93 tyrosine kinases originally published in 
-Johnson et al. 2023. and Yaron-Barir et a. 2024.
+human serine/threonine and 93 tyrosine kinases originally published in 
+Johnson et al. 2023 and Yaron-Barir et a. 2024.
 
 The package includes functionality to match PWMs against user-provided 
 phosphosites and to convert PWM scores into percentile ranks using background

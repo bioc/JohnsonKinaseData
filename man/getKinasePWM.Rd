@@ -4,7 +4,7 @@
 \alias{getKinasePWM}
 \title{Get a list of position specific weight matrices (PWMs) for human kinases}
 \usage{
-getKinasePWM(includeSTfavorability = TRUE, matchAcceptorSpecificity = TRUE)
+getKinasePWM(includeSTfavorability = TRUE, matchAcceptorSpecificity = FALSE)
 }
 \arguments{
 \item{includeSTfavorability}{Include serine vs. threonine favorability for
@@ -32,8 +32,8 @@ favorability of serine over threonine, but can be omitted when setting
 'includeSTfavorability=FALSE'.
 
 The specificity of a kinase PWM is controlled by parameter
-'matchAcceptorSpecificity'. It is set to 'TRUE' by default. Sites without a
-matching acceptor are scored with -Inf in this case.
+'matchAcceptorSpecificity'. If set to 'TRUE', sites without a matching
+acceptor are scored with '-Inf'.
 }
 \examples{
 pwms <- getKinasePWM()

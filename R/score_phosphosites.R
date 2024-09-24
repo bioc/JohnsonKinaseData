@@ -14,8 +14,8 @@
 #' 'includeSTfavorability=FALSE'.
 #'
 #' The specificity of a kinase PWM is controlled by parameter
-#' 'matchAcceptorSpecificity'. It is set to 'TRUE' by default. Sites without a
-#' matching acceptor are scored with -Inf in this case.
+#' 'matchAcceptorSpecificity'. If set to 'TRUE', sites without a matching
+#' acceptor are scored with '-Inf'.
 #'
 #' @param includeSTfavorability Include serine vs. threonine favorability for
 #'   the central phospho-acceptor?
@@ -44,7 +44,7 @@
 #' @examples
 #' pwms <- getKinasePWM()
 getKinasePWM <- function(includeSTfavorability=TRUE,
-                         matchAcceptorSpecificity=TRUE) {
+                         matchAcceptorSpecificity=FALSE) {
   
     checkmate::assert_logical(includeSTfavorability)
     checkmate::assert_logical(matchAcceptorSpecificity)
@@ -103,8 +103,8 @@ getKinasePWM <- function(includeSTfavorability=TRUE,
 #' set of background scores.
 #'
 #' @return A named list of functions, one for each kinase PWM. Each function is
-#'   taking a vector of log2-odds scores and maps them to a percentile rank in
-#'   the range 0 to 100.
+#'   taking a vector of log2-odds scores as input and returns the corresponding
+#'   percentile ranks.
 #'
 #' @importFrom stats approxfun
 #'
@@ -133,7 +133,7 @@ getScoreMaps <- function() {
 .scoreSinglePWM <- function(sites, pwm) {
     vapply(sites, 
            FUN=function(aa) {
-               aa <- substr(aa, 1, ncol(pwm))
+               aa <- aa[seq_len(ncol(pwm))]
                aa_score <- pwm[cbind(base::match(aa,rownames(pwm)), 
                                      seq_along(aa))]
                sum(aa_score, na.rm=TRUE) 

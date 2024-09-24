@@ -138,8 +138,8 @@ processPhosphopeptides <- function(sites,
     stringr::str_sub(data$processed, start=upstream+1, end=upstream+1) <- 
         (data |> dplyr::pull(acceptor))
     
-    if (any(!data$acceptor %in% c('S','T','K')))
-        warning('No S/T/K at central phospho-acceptor position.')
+    if (any(!data$acceptor %in% c('S','T','Y')))
+        warning('No S/T/Y at central phospho-acceptor position.')
     
     if (!allowPhosphoPriming) {
         data <- data |> 

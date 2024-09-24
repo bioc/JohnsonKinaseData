@@ -28,7 +28,7 @@ each of the sets. The resulting data frames contain the log2-odds score per
 phosphosite and PWM.
 }
 \examples{
-bg <- getBackgroundScores()
+bg <- getBackgroundScores(phosphoAcceptor='Tyr')
 }
 \references{
 Johnson, J.L., Yaron, T.M., Huntsman, E.M. et al. An atlas of

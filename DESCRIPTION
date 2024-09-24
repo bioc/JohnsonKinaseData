@@ -1,11 +1,11 @@
 Package: JohnsonKinaseData
-Title: Kinase PWMs based on data published by Johnson et al. 2023  (doi:10.1038/s41586-022-05575-3) and Yaron-Barir et al. 2024 (doi:10.1038/s41586-024-07407-y)
+Title: Kinase PWMs based on data published by Johnson et al. 2023 and Yaron-Barir et al. 2024 
 Version: 1.2.0
-Date: 2023-09-19
+Date: 2023-09-24
 Authors@R:
     person("Florian", "Geier", , "florian.geier@unibas.ch", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-9076-9264"))
-Description: The packages provides position specific weight matrices (PWMs) for 303 human serine/threonine and 93 tyrosine kinases originally published in Johnson et al. 2023. and Yaron-Barir et a. 2024. It includes gene annotation for each kinase PWM and PWM matching scores for a set of curated human phosphosites which can be used to map a PWM score to its percentile rank. The package also includes basic functionality to score user provided phosphosites. 
+Description: The packages provides position specific weight matrices (PWMs) for 303 human serine/threonine and 93 tyrosine kinases originally published in Johnson et al. 2023 (doi:10.1038/s41586-022-05575-3) and Yaron-Barir et al. 2024 (doi:10.1038/s41586-024-07407-y). The package includes basic functionality to score user provided phosphosites. It also includes pre-computed PWM scores ("background scores") for a large collection of curated human phosphosites which can be used to rank PWM scores relative to the background scores ("percentile rank").
 License: MIT + file LICENSE
 URL: https://github.com/fgeier/JohnsonKinaseData/
 BugReports: https://support.bioconductor.org/t/JohnsonKinaseData

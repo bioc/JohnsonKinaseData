@@ -2,34 +2,11 @@
 % Please edit documentation in R/JohnsonKinaseData-package.R
 \docType{package}
 \name{JohnsonKinaseData-package}
-\alias{JohnsonKinaseData-package}
 \alias{JohnsonKinaseData}
-\title{JohnsonKinaseData}
+\alias{JohnsonKinaseData-package}
+\title{JohnsonKinaseData: Kinase PWMs based on data published by Johnson et al. 2023 and Yaron-Barir et al. 2024}
 \description{
-The \pkg{JohnsonKinaseData} package provides position specific
-weight matrices (PWMs) for 303 human serine/threonine and 93 tyrosine
-kinases originally published in Johnson et al. 2023. and Yaron-Barir et a.
-2024
-
-It also includes pre-computed PWM scores ("background scores") for a large
-collection of curated human phosphosites.
-
-The package additionally offers functionality to match kinase PWMs against
-user-provided phospho-peptides and to rank PWM scores relative to the
-background scores ("percentile rank").
-}
-\references{
-Johnson, J.L., Yaron, T.M., Huntsman, E.M. et al. An atlas of
-substrate specificities for the human serine/threonine kinome. Nature 613,
-759–766 (2023). https://doi.org/10.1038/s41586-022-05575-3
-
-Yaron-Barir, T.M., Joughin, B.A., Huntsman, E.M. et al. The intrinsic
-substrate specificity of the human tyrosine kinome. Nature 629, 1174–1181
-(2024). https://doi.org/10.1038/s41586-024-07407-y
-
-Yaffe, M., Leparc, G., Lai, J. et al. A motif-based profile scanning
-approach for genome-wide prediction of signaling pathways. Nat Biotechnol
-19, 348–353 (2001). https://doi.org/10.1038/86737
+The packages provides position specific weight matrices (PWMs) for 303 human serine/threonine and 93 tyrosine kinases originally published in Johnson et al. 2023 (doi:10.1038/s41586-022-05575-3) and Yaron-Barir et al. 2024 (doi:10.1038/s41586-024-07407-y). The package includes basic functionality to score user provided phosphosites. It also includes pre-computed PWM scores ("background scores") for a large collection of curated human phosphosites which can be used to rank PWM scores relative to the background scores ("percentile rank").
 }
 \seealso{
 Useful links:
@@ -40,5 +17,7 @@ Useful links:
 
 }
 \author{
-Florian Geier (florian.geier@unibas.ch)
+\strong{Maintainer}: Florian Geier \email{florian.geier@unibas.ch} (\href{https://orcid.org/0000-0002-9076-9264}{ORCID})
+
 }
+\keyword{internal}

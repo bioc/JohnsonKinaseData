@@ -1,3 +1,9 @@
+# JohnsonKinaseData 1.2.0
+
+* Added tyrosine kinase PWMs published in Yaron-Barir et al. 2024
+* Added option to mach acceptor specificity
+* Added upstream/downstream options to flexibly trim phospho-peptides
+
 # JohnsonKinaseData 0.99.3
 
 * Fix selection of left-most central acceptor

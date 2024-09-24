@@ -2,30 +2,38 @@
 % Please edit documentation in R/score_phosphosites.R
 \name{getKinasePWM}
 \alias{getKinasePWM}
-\title{Get a list of position specific weight matrices (PWMs)}
+\title{Get a list of position specific weight matrices (PWMs) for human kinases}
 \usage{
-getKinasePWM(includeSTfavorability = TRUE)
+getKinasePWM(includeSTfavorability = TRUE, matchAcceptorSpecificity = TRUE)
 }
 \arguments{
 \item{includeSTfavorability}{Include serine vs. threonine favorability for
 the central phospho-acceptor?}
+
+\item{matchAcceptorSpecificity}{Only score sites with a matching central
+phospho-acceptor?}
 }
 \value{
 A named list of numeric matrices (PWMs).
 }
 \description{
-The function returns a list of PWMs for the 303 human serine/threonine
-kinases originally published in Johnson et al. 2023. Each PWM stores the
-log2-odds score per amino acid (23 rows) and position (10 columns) in matrix
-format. Beside the 20 standard amino acids also phosphorylated serine,
-threonine and tyrosine residues are included.
+The function returns a named list of 396 kinase PWMs. Among these are 303
+serine/threonine kinases, 78 canonical tyrosine kinases and 15 non-canonical
+tyrosine kinases i.e. dual-specific kinases, indicated by the '_TYR' suffix.
 }
 \details{
-The central phospho-acceptor position of each PWM is either serine or
-threonine. By default, this position quantifies the favorability of serine
-over threonine. This favorability can be omitted when setting
-'includeSTfavorability=FALSE' in which case the central position doesn't
-contribute to the PWM score.
+Each PWM stores the log2-odds score per amino acid (23 rows) and position (10
+or 11 columns) in matrix format. Beside the 20 standard amino acids also
+phosphorylated serine, threonine and tyrosine residues are included.
+
+The central phospho-acceptor position of each PWM is at position \code{0} (column
+6). For serine/threonine specific kinases this position quantifies the
+favorability of serine over threonine, but can be omitted when setting
+'includeSTfavorability=FALSE'.
+
+The specificity of a kinase PWM is controlled by parameter
+'matchAcceptorSpecificity'. It is set to 'TRUE' by default. Sites without a
+matching acceptor are scored with -Inf in this case.
 }
 \examples{
 pwms <- getKinasePWM()
@@ -34,4 +42,8 @@ pwms <- getKinasePWM()
 Johnson, J.L., Yaron, T.M., Huntsman, E.M. et al. An atlas of
 substrate specificities for the human serine/threonine kinome. Nature 613,
 759–766 (2023). https://doi.org/10.1038/s41586-022-05575-3
+
+Yaron-Barir, T.M., Joughin, B.A., Huntsman, E.M. et al. The intrinsic
+substrate specificity of the human tyrosine kinome. Nature 629, 1174–1181
+(2024). https://doi.org/10.1038/s41586-024-07407-y
 }

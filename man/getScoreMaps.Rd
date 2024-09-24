@@ -8,22 +8,24 @@ getScoreMaps()
 }
 \value{
 A named list of functions, one for each kinase PWM. Each function is
-taking a vector of PWM log2-odds scores and maps them to a percentile rank
-in the range 0 to 100.
+taking a vector of log2-odds scores and maps them to a percentile rank in
+the range 0 to 100.
 }
 \description{
 For each kinase PWM, get a function that maps its log2-odds score to the
 percentile rank in the background score distribution. The percentile rank of
 a given score is the percentage of scores in corresponding background score
 distribution that are less than or equal to that score. The background score
-distribution per PWM is derived from matching each PWM to the 85'603 unique
-phosphosites published in Johnson et al. 2023.
+distribution per PWM is derived from matching each PWM to either the 85'603
+unique phosphosites published in Johnson et al. 2023 (serine/threonine PWMs)
+or the 6659 unique phosphosites published in Yaron-Barir et al. 2024
+(tyrosine PWMs).
 }
 \details{
-The background sites used by Johnson et al. don't contain non-central
-phosphorylated residues (phospho-priming). Therefore any input sites which
-include phospho-priming will be capped to 100 percentile rank, if their PWM
-score exceeds the largest observed background score for that PWM.
+Note: since the background sites don't contain non-central phosphorylated
+residues (phospho-priming), the percentile rank of an input site which
+includes phospho-priming will be capped to 100, if its PWM score exceeds the
+largest observed background score for that PWM.
 
 Internally, \link[stats:approxfun]{stats::approxfun} is used to linearly interpolate between the
 PWM score and its 0.1\% - quantile in the distribution over background scores.

@@ -1,4 +1,4 @@
-# JohnsonKinaseData 1.2.0
+# JohnsonKinaseData 2.1.0
 
 * Added tyrosine kinase PWMs published in Yaron-Barir et al. 2024
 * Added option to mach acceptor specificity

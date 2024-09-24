@@ -1,25 +1,34 @@
-#' Get a list of position specific weight matrices (PWMs)
+#' Get a list of position specific weight matrices (PWMs) for human kinases
 #'
-#' The function returns a list of PWMs for the 303 human serine/threonine
-#' kinases originally published in Johnson et al. 2023. Each PWM stores the
-#' log2-odds score per amino acid (23 rows) and position (10 columns) in matrix
-#' format. Beside the 20 standard amino acids also phosphorylated serine,
-#' threonine and tyrosine residues are included.
+#' The function returns a named list of 396 kinase PWMs. Among these are 303
+#' serine/threonine kinases, 78 canonical tyrosine kinases and 15 non-canonical
+#' tyrosine kinases i.e. dual-specific kinases, indicated by the '_TYR' suffix.
 #'
-#' The central phospho-acceptor position of each PWM is either serine or
-#' threonine. By default, this position quantifies the favorability of serine
-#' over threonine. This favorability can be omitted when setting
-#' 'includeSTfavorability=FALSE' in which case the central position doesn't
-#' contribute to the PWM score.
+#' Each PWM stores the log2-odds score per amino acid (23 rows) and position (10
+#' or 11 columns) in matrix format. Beside the 20 standard amino acids also
+#' phosphorylated serine, threonine and tyrosine residues are included.
+#'
+#' The central phospho-acceptor position of each PWM is at position `0` (column
+#' 6). For serine/threonine specific kinases this position quantifies the
+#' favorability of serine over threonine, but can be omitted when setting
+#' 'includeSTfavorability=FALSE'.
+#'
+#' The specificity of a kinase PWM is controlled by parameter
+#' 'matchAcceptorSpecificity'. It is set to 'TRUE' by default. Sites without a
+#' matching acceptor are scored with -Inf in this case.
 #'
 #' @param includeSTfavorability Include serine vs. threonine favorability for
 #'   the central phospho-acceptor?
 #'
+#' @param matchAcceptorSpecificity Only score sites with a matching central
+#'   phospho-acceptor?
+#'
 #' @return A named list of numeric matrices (PWMs).
 #'
 #' @importFrom checkmate assert_logical
-#' @importFrom dplyr select
+#' @importFrom dplyr mutate
 #' @importFrom dplyr pull
+#' @importFrom dplyr select
 #' @importFrom tidyr pivot_wider
 #'
 #' @export
@@ -28,16 +37,21 @@
 #'   substrate specificities for the human serine/threonine kinome. Nature 613,
 #'   759–766 (2023). https://doi.org/10.1038/s41586-022-05575-3
 #'
+#'   Yaron-Barir, T.M., Joughin, B.A., Huntsman, E.M. et al. The intrinsic
+#'   substrate specificity of the human tyrosine kinome. Nature 629, 1174–1181
+#'   (2024). https://doi.org/10.1038/s41586-024-07407-y
+#'
 #' @examples
 #' pwms <- getKinasePWM()
-getKinasePWM <- function(includeSTfavorability=TRUE) {
+getKinasePWM <- function(includeSTfavorability=TRUE,
+                         matchAcceptorSpecificity=TRUE) {
   
     checkmate::assert_logical(includeSTfavorability)
+    checkmate::assert_logical(matchAcceptorSpecificity)
     
-    pwms <- read.csv( JohnsonKinasePWM() )
-    
-    ## convert to a list of numeric matrices
-    lapply(split(pwms, pwms$Matrix), function(x) {
+    .convert_to_matrix <- function(x,
+                                   includeSTfavorability=TRUE,
+                                   acceptorSpecificity=NULL) {
         x <- x |> 
             dplyr::select(-Matrix) |> 
             tidyr::pivot_wider(values_from=Score, 
@@ -45,9 +59,26 @@ getKinasePWM <- function(includeSTfavorability=TRUE) {
         y <- as.matrix(x |> dplyr::select(-AA))
         rownames(y) <- x |> dplyr::pull(AA)
         if (!includeSTfavorability)
-            y[,'0'] <- NA_real_
+            y[c('S','T'),'0'] <- NA_real_
         y
-    })
+        if (!is.null(acceptorSpecificity))
+            y[setdiff(rownames(y), acceptorSpecificity),'0'] <- -Inf
+        y
+    }
+    
+    pwm <- read.csv( .JohnsonKinasePWM() )
+    st <- lapply(split(pwm, pwm$Matrix), .convert_to_matrix, 
+                 includeSTfavorability=includeSTfavorability,
+                 acceptorSpecificity=if (matchAcceptorSpecificity) c('S','T','s','t')
+                 )
+
+    pwm <- read.csv( .TyrosineKinasePWM() )
+    ty <- lapply(split(pwm, pwm$Matrix), .convert_to_matrix, 
+                 includeSTfavorability=FALSE,
+                 acceptorSpecificity=if (matchAcceptorSpecificity) c('Y','y')
+    )
+    
+    c(st, ty)
 }
 
 #' Map log2-odds score to percentile rank
@@ -56,13 +87,15 @@ getKinasePWM <- function(includeSTfavorability=TRUE) {
 #' percentile rank in the background score distribution. The percentile rank of
 #' a given score is the percentage of scores in corresponding background score
 #' distribution that are less than or equal to that score. The background score
-#' distribution per PWM is derived from matching each PWM to the 85'603 unique
-#' phosphosites published in Johnson et al. 2023.
+#' distribution per PWM is derived from matching each PWM to either the 85'603
+#' unique phosphosites published in Johnson et al. 2023 (serine/threonine PWMs)
+#' or the 6659 unique phosphosites published in Yaron-Barir et al. 2024
+#' (tyrosine PWMs).
 #'
-#' The background sites used by Johnson et al. don't contain non-central
-#' phosphorylated residues (phospho-priming). Therefore any input sites which
-#' include phospho-priming will be capped to 100 percentile rank, if their PWM
-#' score exceeds the largest observed background score for that PWM.
+#' Note: since the background sites don't contain non-central phosphorylated
+#' residues (phospho-priming), the percentile rank of an input site which
+#' includes phospho-priming will be capped to 100, if its PWM score exceeds the
+#' largest observed background score for that PWM.
 #'
 #' Internally, [stats::approxfun] is used to linearly interpolate between the
 #' PWM score and its 0.1% - quantile in the distribution over background scores.
@@ -70,8 +103,8 @@ getKinasePWM <- function(includeSTfavorability=TRUE) {
 #' set of background scores.
 #'
 #' @return A named list of functions, one for each kinase PWM. Each function is
-#'   taking a vector of PWM log2-odds scores and maps them to a percentile rank
-#'   in the range 0 to 100.
+#'   taking a vector of log2-odds scores and maps them to a percentile rank in
+#'   the range 0 to 100.
 #'
 #' @importFrom stats approxfun
 #'
@@ -80,7 +113,10 @@ getKinasePWM <- function(includeSTfavorability=TRUE) {
 #' @examples
 #' maps <- getScoreMaps()
 getScoreMaps <- function() {
-    PR <- read.csv( JohnsonKinaseBackgroundQuantiles() )
+    PR <- cbind(
+        read.csv( .JohnsonKinaseBackgroundQuantiles() ),
+        read.csv( .TyrosineKinaseBackgroundQuantiles() )[,-1]
+    )
     lapply(PR[,-1], function(score, quant) {
         stats::approxfun(score, quant, 
                          yleft=0, yright=100, 
@@ -90,11 +126,14 @@ getScoreMaps <- function() {
 
 
 #' Low level single PWM scoring function. All unmatched characters (like "_" or
-#' ".") evaluate to NA and don't contribute to the score sum
+#' ".") evaluate to NA and don't contribute to the score sum. All strings must
+#' be left aligned with the PWM. Characters extending the width of the PWM are 
+#' excluded.
 #' @noRd
 .scoreSinglePWM <- function(sites, pwm) {
     vapply(sites, 
            FUN=function(aa) {
+               aa <- substr(aa, 1, ncol(pwm))
                aa_score <- pwm[cbind(base::match(aa,rownames(pwm)), 
                                      seq_along(aa))]
                sum(aa_score, na.rm=TRUE) 
@@ -167,21 +206,13 @@ scorePhosphosites <- function(pwms, sites,
     checkmate::assert_list(pwms, types=c("numeric", "matrix"), 
                            unique=TRUE, any.missing=FALSE, names='named')
     
-    if (!all(vapply(pwms, ncol, NA_integer_) == 10)) {
-        stop('PWMs have incorrect dimension!')
-    }
-    
     checkmate::assert_character(sites)
-    
-    splitted <- strsplit(sites, split="")
-    
-    if (!all(vapply(splitted, length, NA_integer_) == 10)) {
-        stop("'sites' elements are expected to be of length 10. Consider using 'processPhosphopeptides()'.")
-    }
     
     scoreType <- match.arg(scoreType)
     
     checkmate::assert_class(BPPARAM, "BiocParallelParam")
+    
+    splitted <- strsplit(sites, split="")
     
     scores <- .scoreMultiplePWM(splitted, pwms, BPPARAM)
     

@@ -1,3 +1,7 @@
+# JohnsonKinaseData 1.1.1
+
+* Version bump
+
 # JohnsonKinaseData 1.1.0
 
 * Added tyrosine kinase PWMs published in Yaron-Barir et al. 2024
